@@ -230,6 +230,30 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
 .stage.anim .node:nth-of-type(n){animation-delay:.05s}
 @media (prefers-reduced-motion:reduce){.stage.anim *{animation:none!important}.cbar{animation:none}}
 
+/* shelves: Top 10 rows, hover previews, cascade entrance */
+.t10{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(300px,1fr);gap:8px;overflow-x:auto;padding:6px 4px 18px;scrollbar-width:thin}
+.t10i{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:0;align-items:end}
+.t10i .rank{grid-row:1/2;font-size:clamp(110px,10vw,168px);font-weight:800;line-height:.78;letter-spacing:-.08em;color:transparent;-webkit-text-stroke:3px var(--ink-3);margin-right:-18px;position:relative;z-index:0;transition:-webkit-text-stroke-color .2s,color .2s;font-variant-numeric:tabular-nums}
+.t10i:hover .rank{-webkit-text-stroke-color:var(--wine);color:color-mix(in oklab,var(--wine) 14%,transparent)}
+.t10i .th{grid-column:2;position:relative;z-index:1;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--chip);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.t10i .th img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.t10i:hover .th img{transform:scale(1.05)}
+.t10t{grid-column:2;font-weight:500;font-size:14px;line-height:1.3;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.t10m{grid-column:2;font-size:12px;color:var(--ink-2);margin-top:2px}
+.more-h{font-size:16px;margin:18px 0 12px}
+[data-vid]{position:relative}
+.pv{position:absolute;inset:0;z-index:2;opacity:0;overflow:hidden;pointer-events:none;background:#000}
+.pv.ready{opacity:1;transition:opacity .25s}
+.pv iframe{position:absolute;top:50%;left:50%;width:100%;height:100%;border:0;transform:translate(-50%,-50%) scale(1.25)}
+[data-vid] .badge{z-index:3}
+.previewing .badge{background:var(--wine)}
+.card.watched-io:not(.in),.t10i.watched-io:not(.in){opacity:0}
+.card.in,.t10i.in{animation:cardIn .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+.lower h2{font-size:clamp(22px,2.4vw,30px);letter-spacing:-.02em}
+@media (prefers-reduced-motion:reduce){.card.in,.t10i.in{animation:none}.card.watched-io:not(.in),.t10i.watched-io:not(.in){opacity:1}}
+@media (max-width:640px){.t10{grid-auto-columns:minmax(250px,1fr)}.t10i .rank{font-size:96px;margin-right:-12px}}
+
 /* charts */
 .heat{display:grid;gap:2px;align-items:center;height:100%;align-content:stretch}
 .heat .cell{border-radius:2px;min-width:0;height:100%;min-height:10px}
@@ -394,9 +418,19 @@ const countPlays = pred => P.reduce((a, p) => a + (pred(p) ? 1 : 0), 0);
 const plays = n => n === 1 ? "1 play" : n + " plays";
 function card(c, badge, meta) {
   return `<a class="card" href="https://www.youtube.com/watch?v=${c.id}" target="_blank" rel="noopener">
-    <div class="th"><img loading="lazy" src="${thumb(c.id)}" alt=""><span class="badge">${badge}</span></div>
+    <div class="th" data-vid="${c.id}"><img loading="lazy" src="${thumb(c.id)}" alt=""><span class="badge">${badge}</span></div>
     <div class="ct">${esc(c.t)}</div>
     <div class="cm">${esc(c.ch)}<br>${meta || `<span class="tag">${esc(c.topic)}</span> · ${c.n > 1 ? `${c.n} plays, last ${c.last}` : c.first}`}</div></a>`;
+}
+// A ranked shelf: a Top 10 row with giant rank numbers, then the rest as a grid.
+function shelf(list) {
+  if (list.length < 4) return grid(list.map(x => card(x.c, x.badge)));
+  const top = list.slice(0, 10), rest = list.slice(10);
+  return `<div class="t10">${top.map((x, i) => `<a class="t10i" href="https://www.youtube.com/watch?v=${x.c.id}" target="_blank" rel="noopener">
+      <span class="rank" aria-hidden="true">${i + 1}</span>
+      <div class="th" data-vid="${x.c.id}"><img loading="lazy" src="${thumb(x.c.id)}" alt=""><span class="badge">${x.badge}</span></div>
+      <div class="t10t">${esc(x.c.t)}</div><div class="t10m">${esc(x.c.ch)}</div></a>`).join("")}</div>
+    ${rest.length ? `<h3 class="more-h">More</h3>${grid(rest.map(x => card(x.c, x.badge)))}` : ""}`;
 }
 const grid = items => items.length ? `<div class="grid">${items.join("")}</div>` : `<p class="empty">No titled videos here. Deleted videos and blocked topics count in the charts but are never shown.</p>`;
 
@@ -447,7 +481,7 @@ const CH = [
       const count = all ? 0 : D.all.filter(c => c.topic === t).length;
       return `<h2>${all ? "Played again and again" : esc(t)}</h2><p class="lede">${all ? `${fmt(M.rewatched_videos)} videos got more than one play. ${pct(M.repeat_share)} of all plays were repeats, led by self-help videos.` : `${fmt(count)} videos${count > 60 ? ", the 60 most played shown" : ""}, most played first.`}</p>
         <div class="chips">${topics.map(x => `<a class="chip ${x === t ? "on" : ""}" href="#intro/${encodeURIComponent(x)}">${esc(x)}</a>`).join("")}</div>
-        ${grid(list.map(c => card(c, plays(c.n))))}`;
+        ${shelf(list.map(c => ({c, badge: plays(c.n)})))}`;
     },
   },
   {
@@ -472,7 +506,7 @@ const CH = [
       const items = topCards(p => p[2] >= b.lo && p[2] <= b.hi);
       return `<h2>Played ${b.label}</h2><p class="lede">${fmt(countPlays(p => p[2] >= b.lo && p[2] <= b.hi))} plays in this window. Top topic: <b>${esc(D.hours.peak_band[b.k])}</b>.</p>
         <div class="chips">${BANDS.map(x => `<a class="chip ${x.k === b.k ? "on" : ""}" href="#hours/${x.k}">${x.label}<small>${countPlays(p => p[2] >= x.lo && p[2] <= x.hi)}</small></a>`).join("")}</div>
-        ${grid(items.map(({c, k}) => card(c, plays(k))))}`;
+        ${shelf(items.map(({c, k}) => ({c, badge: plays(k)})))}`;
     },
   },
   {
@@ -493,7 +527,7 @@ const CH = [
       const m = +f, L = D.months.labels;
       return `<h2>Most played in ${L[m]}</h2><p class="lede">${D.months.total[m]} plays that month.</p>
         <div class="chips">${L.map((l, i) => `<a class="chip ${i === m ? "on" : ""}" href="#seasons/${i}">${l}<small>${D.months.total[i]}</small></a>`).join("")}</div>
-        ${grid(topCards(p => p[3] === m).map(({c, k}) => card(c, plays(k))))}`;
+        ${shelf(topCards(p => p[3] === m).map(({c, k}) => ({c, badge: plays(k)})))}`;
     },
   },
   {
@@ -520,7 +554,7 @@ const CH = [
       const list = D.all.filter(c => c.topic === t).sort((a, b) => b.dw - a.dw || b.n - a.n).slice(0, 36);
       return `<h2>${esc(t)}, longest watched first</h2><p class="lede">The badge is the median time I stayed before the next video.</p>
         <div class="chips">${tops.map(x => `<a class="chip ${x === t ? "on" : ""}" href="#attention/${encodeURIComponent(x)}">${esc(x)}<small>${mmss(att(x).dwell)}</small></a>`).join("")}</div>
-        ${grid(list.map(c => card(c, mmss(c.dw))))}`;
+        ${shelf(list.map(c => ({c, badge: mmss(c.dw)})))}`;
     },
   },
   {
@@ -575,7 +609,7 @@ const CH = [
       const top = D.channels.top.filter(c => D.all.some(x => x.ch === c.name)), name = f || top[0].name;
       return `<h2>${esc(name)}</h2><p class="lede">Pick a regular to see what I watched from them.</p>
         <div class="chips">${top.map(c => `<a class="chip ${c.name === name ? "on" : ""}" href="#channels/${encodeURIComponent(c.name)}">${esc(c.name)}<small>${c.n}</small></a>`).join("")}</div>
-        ${grid(D.all.filter(c => c.ch === name).map(c => card(c, plays(c.n))))}`;
+        ${shelf(D.all.filter(c => c.ch === name).map(c => ({c, badge: plays(c.n)})))}`;
     },
   },
   {
@@ -595,7 +629,7 @@ const CH = [
     method: () => `Search text never leaves my laptop; only search timestamps are used. Each one is matched to the next video start with a binary search over the sorted watch times (<code>numpy.searchsorted</code>, O(log n) per search). The videos below started within 60 seconds of a search.`,
     lower() {
       return `<h2>Videos I searched for</h2><p class="lede">${D.search_led.length} titled videos started within a minute of a search. The searches themselves stay private.</p>
-        ${grid(D.search_led.slice(0, 48).map(i => card(D.all[i], plays(D.all[i].n))))}`;
+        ${shelf(D.search_led.slice(0, 48).map(i => ({c: D.all[i], badge: plays(D.all[i].n)})))}`;
     },
   },
   {
@@ -860,12 +894,12 @@ function scrub(chId, day) {
 }
 function dayLower(d) {
   const items = topCards(p => p[1] === d, 200), n = D.daily.n[d];
-  return `<h2>${dayLabel(d)}</h2><p class="lede">${n} video${n === 1 ? "" : "s"} that night (a night runs until 5 AM); ${items.length} titled videos shown. Click any bar in the progress bar to pick another night.</p>${grid(items.map(({c, k}) => card(c, plays(k))))}`;
+  return `<h2>${dayLabel(d)}</h2><p class="lede">${n} video${n === 1 ? "" : "s"} that night (a night runs until 5 AM); ${items.length} titled videos shown. Click any bar in the progress bar to pick another night.</p>${shelf(items.map(({c, k}) => ({c, badge: plays(k)})))}`;
 }
 function searchLower(q) {
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
   const hits = D.all.filter(c => { const s = (c.t + " " + c.ch + " " + c.topic).toLowerCase(); return words.every(w => s.includes(w)); });
-  return `<h2>“${esc(q)}”</h2><p class="lede">${hits.length} matching title${hits.length === 1 ? "" : "s"}. Keyword search over ${fmt(D.all.length)} titles, channels and topics.</p>${grid(hits.slice(0, 60).map(c => card(c, plays(c.n))))}`;
+  return `<h2>“${esc(q)}”</h2><p class="lede">${hits.length} matching title${hits.length === 1 ? "" : "s"}. Keyword search over ${fmt(D.all.length)} titles, channels and topics.</p>${shelf(hits.slice(0, 60).map(c => ({c, badge: plays(c.n)})))}`;
 }
 function render(chId, f, opts = {}) {
   const i = CHI[chId] ?? 0, ch = CH[i], filt = f === undefined ? ch.defaultFilter : f;
@@ -981,6 +1015,33 @@ document.addEventListener("pointerover", e => {
   flip = setInterval(() => { stack.querySelectorAll("img").forEach((im, j) => im.src = thumb(ids[(k + j) % ids.length])); k++; }, 650);
   stack.closest(".qi").addEventListener("pointerleave", () => { clearInterval(flip); flip = null; }, {once: true});
 });
+
+/* hover a thumbnail to play the real video inside it, muted, like YouTube's previews */
+let pvTimer = null;
+if (matchMedia("(hover: hover)").matches) {
+  document.addEventListener("pointerover", e => {
+    const th = e.target.closest("[data-vid]");
+    if (!th || th.querySelector(".pv")) return;
+    clearTimeout(pvTimer);
+    pvTimer = setTimeout(() => {
+      if (!th.matches(":hover")) return;
+      const pv = document.createElement("div");
+      pv.className = "pv"; pv.dataset.yt = "";
+      th.appendChild(pv);
+      CLIPS["_pv"] = [th.dataset.vid, 25];
+      mountClip(pv, "_pv");
+      th.classList.add("previewing");
+      th.addEventListener("pointerleave", () => { pv.remove(); th.classList.remove("previewing"); }, {once: true});
+    }, 450);
+  });
+}
+/* cards rise into view in a quick cascade as they scroll in */
+const cardIO = new IntersectionObserver(entries => {
+  let k = 0;
+  entries.forEach(en => { if (en.isIntersecting) { en.target.style.animationDelay = (k++ % 8) * 45 + "ms"; en.target.classList.add("in"); cardIO.unobserve(en.target); } });
+}, {rootMargin: "0px 0px -40px 0px"});
+new MutationObserver(() => document.querySelectorAll(".card:not(.in):not(.watched-io), .t10i:not(.in):not(.watched-io)").forEach(el => { el.classList.add("watched-io"); cardIO.observe(el); }))
+  .observe($("#view"), {childList: true, subtree: true});
 
 route();
 </script>
