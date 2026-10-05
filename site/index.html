@@ -956,7 +956,7 @@ function startTrailer() {
     }
     $("#tcopy").innerHTML = `<div class="tk"><i class="rule"></i>${esc(b.kick)}</div><div class="tbig${b.word ? " word" : ""}" id="tbig">${b.word || "0" + (b.suffix ? `<span class="suf">${b.suffix}</span>` : "")}</div>${b.line ? `<div class="tline">${typeLine(b.line)}</div>` : ""}`;
     const flash = $("#tflash"); flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
-    root.classList.toggle("flip", T.k % 2 === 0 && T.k > 1);
+    root.classList.remove("flip");   // the arch stays put; films and the push-in carry the motion
     const arch = $("#arch"); arch.classList.remove("push"); void arch.offsetWidth; arch.classList.add("push");
     if (b.count !== undefined) {
       const t0 = performance.now(), el = $("#tbig");
