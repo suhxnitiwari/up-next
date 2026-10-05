@@ -1,0 +1,7 @@
+.DS_Store
+.venv/
+__pycache__/
+data/
+pipeline/off_limits.txt
+pipeline/exclusions.json
+pipeline/private_topics.json

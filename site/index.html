@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Up Next</title>
+<meta name="description" content="Nine months of my YouTube watch history, parsed from Google Takeout into sessions, topics and watch time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff; --raised:#ffffff; --chip:#f2f2f2; --chip-hover:#e5e5e5; --line:#e5e5e5;
+  --ink:#0f0f0f; --ink-2:#606060; --ink-3:#8a8a8a;
+  --wine:#8E2A3E; --wine-ink:#ffffff; --gold:#A77A1C;
+  --cell0:#f6eef0; --cell1:#8E2A3E;
+  --g0:#8E2A3E; --g1:#B07D12; --g2:#1F8466; --g3:#4E6FB0; --g4:#a3a3a3;
+  --shadow:0 4px 32px rgba(0,0,0,.16);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f0f0f; --raised:#212121; --chip:#272727; --chip-hover:#3a3a3a; --line:#303030;
+  --ink:#f1f1f1; --ink-2:#aaaaaa; --ink-3:#7a7a7a;
+  --wine:#D0607A; --wine-ink:#0f0f0f; --gold:#B08A2C;
+  --cell0:#2a1d21; --cell1:#D0607A;
+  --g0:#C04A67; --g1:#A97814; --g2:#23926F; --g3:#6A86D0; --g4:#5f5f5f;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f0f0f; --raised:#212121; --chip:#272727; --chip-hover:#3a3a3a; --line:#303030;
+  --ink:#f1f1f1; --ink-2:#aaaaaa; --ink-3:#7a7a7a;
+  --wine:#D0607A; --wine-ink:#0f0f0f; --gold:#B08A2C;
+  --cell0:#2a1d21; --cell1:#D0607A;
+  --g0:#C04A67; --g1:#A97814; --g2:#23926F; --g3:#6A86D0; --g4:#5f5f5f;
+}
+/* the player is always dark, like a real video frame */
+.player{
+  --ink:#f1f1f1; --ink-2:#b5b5b5; --ink-3:#7f7f7f; --line:#333; --chip:#262626;
+  --wine:#D0607A; --cell0:#2a1d21; --cell1:#D0607A;
+  --g0:#C04A67; --g1:#A97814; --g2:#23926F; --g3:#6A86D0; --g4:#5f5f5f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Roboto,system-ui,sans-serif}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+img{display:block}
+.mono{font-family:"Roboto Mono",ui-monospace,monospace}
+
+/* masthead */
+.mast{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:16px;height:56px;padding:0 16px;background:var(--bg)}
+.burger,.theme{width:40px;height:40px;border:0;background:none;border-radius:50%;cursor:pointer;display:grid;place-items:center;color:var(--ink);flex:none}
+.burger:hover,.theme:hover{background:var(--chip)}
+.logo{display:flex;align-items:center;gap:6px;font-weight:700;font-size:19px;letter-spacing:-.6px;white-space:nowrap}
+.logo .mark{width:26px;height:26px;border-radius:50%;background:var(--wine);display:grid;place-items:center;flex:none}
+.logo .mark svg{margin-left:2px}
+.logo small{font-weight:400;font-size:10px;color:var(--ink-2);align-self:flex-start;margin-top:8px;letter-spacing:0}
+.search{flex:1;min-width:0;max-width:640px;margin:0 auto;position:relative;display:flex}
+.search input{flex:1;min-width:0;height:40px;border:1px solid var(--line);border-right:0;border-radius:40px 0 0 40px;padding:0 16px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;outline:none}
+.search input:focus{border-color:var(--wine)}
+.search .go{width:64px;height:40px;border:1px solid var(--line);border-radius:0 40px 40px 0;background:var(--chip);cursor:pointer;display:grid;place-items:center;flex:none}
+.suggest{position:absolute;top:44px;left:0;right:64px;background:var(--raised);border-radius:12px;box-shadow:var(--shadow);padding:8px 0;display:none;max-height:72vh;overflow:auto}
+.suggest.open{display:block}
+.suggest .hd{padding:6px 16px;font-size:12px;color:var(--ink-2)}
+.suggest a{display:flex;gap:12px;align-items:flex-start;padding:8px 16px;font-size:15px}
+.suggest a:hover,.suggest a.on{background:var(--chip)}
+.suggest a svg{flex:none;color:var(--ink-2);margin-top:1px}
+.suggest .t{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.suggest .ans{display:block;font-size:13px;color:var(--ink-2);margin-top:2px}
+.suggest .ans b{color:var(--wine);font-weight:500}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);color:#fff;display:grid;place-items:center;font-weight:500;flex:none}
+
+/* layout */
+.app{display:flex}
+.guide{position:sticky;top:56px;height:calc(100vh - 56px);width:240px;flex:none;overflow-y:auto;padding:4px 12px 24px}
+.guide a{display:flex;align-items:center;gap:18px;min-height:40px;padding:0 12px;border-radius:10px;font-size:14px}
+.guide a:hover{background:var(--chip)}
+.guide a.on{background:var(--chip);font-weight:500}
+.guide a .num{font-family:"Roboto Mono",monospace;font-size:12px;color:var(--ink-3);width:18px;flex:none}
+.guide a.on .num{color:var(--wine)}
+.guide hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+.guide h4{margin:6px 12px 4px;font-size:16px;font-weight:500}
+.guide p{margin:12px;font-size:12px;color:var(--ink-3);line-height:1.6}
+.guide p a{display:inline;min-height:0;padding:0;color:var(--wine)}
+body.mini .guide{display:none}
+main{flex:1;min-width:0;padding:8px 24px 72px}
+
+/* watch page */
+.watch{display:grid;grid-template-columns:minmax(0,1fr) 402px;gap:24px;max-width:1720px}
+.primary{min-width:0}
+.answer{display:flex;gap:12px;align-items:flex-start;background:var(--chip);border-radius:12px;padding:12px 16px;margin-bottom:12px;font-size:15px}
+.answer svg{flex:none;color:var(--wine)}
+.answer b{font-weight:500}
+.answer .q{color:var(--ink-2);font-size:13px}
+.answer .x{margin-left:auto;color:var(--ink-2);font-size:20px;line-height:1}
+.stage-wrap{position:relative}
+.ambient{position:absolute;inset:6% 4% -4%;border-radius:40px;filter:blur(60px);opacity:.38;pointer-events:none}
+.player{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#0f0f0f;color:var(--ink);display:flex;flex-direction:column}
+.stage{flex:1;min-height:0;position:relative;padding:22px 26px 6px;display:flex;flex-direction:column}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.stage .cap{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin-bottom:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.stage .cap b{color:#fff;font-weight:500;letter-spacing:.08em}
+.stage .cap .legend{text-transform:none;letter-spacing:0}
+.stage .fill{flex:1;min-height:0;position:relative}
+.controls{flex:none;padding:0 12px 8px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.6))}
+.scrub{position:relative;height:26px;display:flex;align-items:flex-end;gap:1px;cursor:pointer}
+.scrub i{flex:1;min-width:0;background:rgba(255,255,255,.22);border-radius:1px 1px 0 0;transition:background .15s}
+.scrub i.hot{background:#D0607A}
+.scrub i:hover,.scrub i.sel{background:#fff}
+.scrub-base{height:3px;background:#D0607A;border-radius:2px;margin-top:1px}
+.ctl{display:flex;align-items:center;gap:14px;font-size:13px;color:#fff;padding-top:7px;min-width:0}
+.ctl .sp{flex:1}
+.ctl a,.ctl span{display:inline-flex;align-items:center;flex:none}
+.ctl .chap{color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:0;display:block}
+.vtitle{font-size:20px;font-weight:700;margin:12px 0 8px;line-height:1.3}
+.owner{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.owner .who{line-height:1.25;min-width:0}
+.owner .who b{display:block;font-weight:500}
+.owner .who span{font-size:12px;color:var(--ink-2);font-family:"Roboto Mono",monospace}
+.pill{height:36px;padding:0 16px;border-radius:18px;border:0;background:var(--chip);font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;transition:transform .08s,background .15s}
+.pill:hover{background:var(--chip-hover)}
+.pill:active,.chip:active,.qi:active,.card:active{transform:scale(.98)}
+.pill.dark{background:var(--ink);color:var(--bg)}
+.desc{background:var(--chip);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:14px}
+.desc .stats{display:flex;gap:28px;flex-wrap:wrap;margin-bottom:10px}
+.desc .stats div{line-height:1.2}
+.desc .stats strong{display:block;font-size:17px;font-family:"Roboto Mono",monospace;font-weight:500}
+.desc .stats span{font-size:12px;color:var(--ink-2)}
+.desc p{margin:0 0 8px;max-width:76ch}
+.desc b{font-weight:500}
+.more{border:0;background:none;padding:0;font-weight:500;cursor:pointer;margin-top:6px}
+.method{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);color:var(--ink-2);font-size:13px;line-height:1.65;max-width:84ch}
+.method.open{display:block}
+.method h4{margin:10px 0 2px;color:var(--ink);font-size:13px;font-weight:500}
+code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--bg);padding:1px 5px;border-radius:4px;color:var(--ink)}
+.asks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.asks .chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg)}
+.asks .chip svg{color:var(--wine)}
+
+/* queue */
+.secondary h3{margin:0 0 10px;font-size:16px;font-weight:500;display:flex;justify-content:space-between;align-items:baseline}
+.secondary h3 span{font-size:12px;color:var(--ink-2);font-weight:400}
+.qi{display:grid;grid-template-columns:168px minmax(0,1fr);gap:10px;margin-bottom:6px;border-radius:12px;padding:4px;position:relative;transition:background .15s,transform .15s}
+.qi:hover{background:var(--chip);transform:translateY(-2px)}
+.qi.now{background:var(--chip)}
+.qi.now:before{content:"";position:absolute;left:-8px;top:12px;bottom:12px;width:3px;border-radius:2px;background:var(--wine)}
+.qthumb{position:relative;aspect-ratio:16/9;border-radius:8px;background:#161616;overflow:hidden}
+.qthumb svg{position:absolute;inset:0;width:100%;height:100%}
+.qthumb > img{width:100%;height:100%;object-fit:cover}
+.qthumb .stack img{position:absolute;top:12%;left:14%;width:72%;height:76%;object-fit:cover;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,.6)}
+.qthumb .stack img:nth-child(1){transform:rotate(-7deg) translateX(-14%)}
+.qthumb .stack img:nth-child(2){transform:rotate(5deg) translateX(12%)}
+.badge{position:absolute;right:4px;bottom:4px;background:rgba(0,0,0,.82);color:#fff;font-size:12px;font-weight:500;padding:1px 5px;border-radius:4px;font-family:"Roboto Mono",monospace}
+.badge.now{left:4px;right:auto;background:var(--wine);color:#fff;font-family:Roboto,sans-serif}
+.qt{font-weight:500;font-size:14px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.qm{font-size:12px;color:var(--ink-2);margin-top:4px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.qm .step{font-family:"Roboto Mono",monospace;font-size:11px}
+
+/* filters + cards */
+.lower{margin-top:28px;max-width:1720px}
+.lower h2{font-size:20px;margin:0 0 4px}
+.lower .lede{color:var(--ink-2);margin:0 0 12px}
+.chips{display:flex;gap:10px;overflow-x:auto;padding:4px 0 14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;height:32px;padding:0 12px;border-radius:8px;border:0;background:var(--chip);font-weight:500;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;transition:background .15s,transform .08s}
+.chip:hover{background:var(--chip-hover)}
+.chip.on{background:var(--ink);color:var(--bg)}
+.chip small{font-weight:400;opacity:.7;margin-left:6px;font-family:"Roboto Mono",monospace}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:32px 16px;animation:fade .3s ease}
+.card{transition:transform .08s}
+.card .th{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--chip)}
+.card .th img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.card:hover .th img{transform:scale(1.04)}
+.card .ct{font-weight:500;font-size:15px;line-height:1.35;margin-top:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .cm{font-size:13px;color:var(--ink-2);margin-top:4px;line-height:1.4}
+.card .cm .tag{color:var(--wine);font-weight:500}
+.empty{color:var(--ink-2);padding:28px 0}
+.panel{margin:20px 0 6px}
+.panel h3{font-size:15px;margin:0 0 2px}
+.panel .lede{color:var(--ink-2);margin:0 0 10px;font-size:13px}
+.panel p{margin:0 0 8px}
+
+/* charts */
+.heat{display:grid;gap:2px;align-items:center;height:100%;align-content:stretch}
+.heat .cell{border-radius:2px;min-width:0;height:100%;min-height:10px}
+.heat .rl{font-size:11px;color:var(--ink-2);padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.heat .cl{font-size:10px;color:var(--ink-3);text-align:center}
+.scale{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-2);text-transform:none;letter-spacing:0}
+.scale i{display:block;width:90px;height:7px;border-radius:4px;background:linear-gradient(90deg,var(--cell0),var(--cell1))}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.stack100{display:flex;gap:10px;height:100%;padding-bottom:20px}
+.stack100 .col{flex:1;display:flex;flex-direction:column-reverse;gap:2px;position:relative;cursor:pointer;min-width:0;border-radius:3px}
+.stack100 .col i{display:block;border-radius:2px;position:relative;min-height:0}
+.stack100 .col i em{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:11px;color:#fff;font-family:"Roboto Mono",monospace}
+.stack100 .col span{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:11px;color:var(--ink-2)}
+.stack100 .col.sel span{color:#fff;font-weight:500}
+.stack100 .col.sel{outline:2px solid #fff;outline-offset:2px}
+.hbars{display:grid;gap:3px;height:100%;align-content:center}
+.hb{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:center;cursor:pointer}
+.hb .lab{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.hb .bar{position:relative;height:18px}
+.hb .bar i{position:absolute;left:0;top:2px;bottom:2px;border-radius:0 4px 4px 0;background:var(--wine)}
+.hb .bar em{position:absolute;top:0;font-style:normal;font-size:11px;line-height:18px;color:var(--ink-2);padding-left:6px;font-family:"Roboto Mono",monospace}
+.hb.sel .lab,.hb:hover .lab{color:#fff}
+.ribbons{display:grid;gap:3px;height:100%;align-content:space-evenly}
+.rib{display:grid;grid-template-columns:150px minmax(0,1fr) 34px;gap:10px;align-items:center;cursor:pointer;border-radius:4px;padding:1px 2px}
+.rib .lab{font-size:11px;color:var(--ink-2);white-space:nowrap;text-align:right;line-height:1.15}
+.rib .lab b{color:var(--ink);font-weight:500}
+.rib .line{display:flex;gap:1px;height:12px}
+.rib .line i{flex:1;min-width:0}
+.rib .n{font-size:11px;color:var(--ink-2);font-family:"Roboto Mono",monospace}
+.rib.sel{background:rgba(255,255,255,.08)}
+.rib:hover .lab b{color:#D0607A}
+.pareto{position:absolute;inset:6px 8px 4px 38px}
+.pareto svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.pareto .mk{position:absolute;border-left:1px dashed rgba(255,255,255,.5);bottom:0;font-size:12px;color:var(--ink-2);padding:0 0 0 8px;white-space:nowrap}
+.pareto .mk b{display:block;font-family:"Roboto Mono",monospace;font-size:22px;font-weight:500;color:#fff}
+.pareto .ax{position:absolute;left:-38px;font-size:10px;color:var(--ink-3);transform:translateY(-50%)}
+.big{font-family:"Roboto Mono",monospace;font-weight:500;font-size:clamp(40px,6vw,84px);line-height:1;letter-spacing:-.03em;color:#fff}
+.flow{display:flex;align-items:stretch;height:100%;padding:4px 0 10px}
+.node{flex:1;min-width:0;background:#1d1d1d;border:1px solid #333;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:5px}
+.node .k{font-family:"Roboto Mono",monospace;font-size:12px;color:#D0607A}
+.node b{font-size:13px;font-weight:500;color:#fff;line-height:1.25}
+.node span{font-size:11px;color:var(--ink-2);line-height:1.35}
+.node .io{margin-top:auto;font-family:"Roboto Mono",monospace;font-size:11px;color:#ddd;border-top:1px solid #333;padding-top:6px}
+.arrow{flex:none;width:18px;display:grid;place-items:center;color:#777}
+.wall{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:1fr;opacity:.34;filter:saturate(.7)}
+.wall img{width:100%;height:100%;object-fit:cover}
+.shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.3) 40%,rgba(0,0,0,.88))}
+.intro{position:absolute;left:5%;right:5%;bottom:8%}
+.intro .kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#ddd}
+.intro h1{margin:8px 0 10px;font-size:clamp(26px,4.2vw,56px);line-height:1.04;letter-spacing:-.02em;font-weight:700;color:#fff}
+.intro .sub{font-size:clamp(13px,1.3vw,17px);color:#ddd;max-width:56ch}
+.cascade{position:relative;height:100%}
+.cascade img{position:absolute;width:38%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.6)}
+.mat{display:grid;gap:2px;font-size:11px}
+.mat div{padding:6px 4px;text-align:center;border-radius:3px;font-family:"Roboto Mono",monospace}
+.mat .h{color:var(--ink-2);font-family:Roboto,sans-serif;text-align:right;padding-right:6px}
+.mat .hc{text-align:center}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th,.table td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.table th{color:var(--ink-2);font-weight:500;font-size:12px}
+
+#tip{position:fixed;z-index:50;pointer-events:none;background:#0f0f0f;color:#f1f1f1;font-size:12px;line-height:1.4;padding:6px 9px;border-radius:6px;max-width:280px;opacity:0;transition:opacity .08s;border:1px solid #333}
+#tip.on{opacity:1}
+#tip b{font-weight:500}
+
+@media (max-width:1240px){.watch{grid-template-columns:1fr}.secondary{max-width:760px}}
+@media (max-width:900px){
+  .guide{display:none}
+  body.nav-open .guide{display:block;position:fixed;left:0;top:56px;z-index:30;background:var(--bg);box-shadow:var(--shadow)}
+  main{padding:8px 16px 64px}
+}
+@media (max-width:760px){
+  .player{aspect-ratio:auto}
+  .stage{padding:16px 14px 8px}
+  .stage .fill{min-height:280px}
+  .stage.has-wall{min-height:340px;justify-content:flex-end}
+  .intro{position:relative;left:auto;right:auto;bottom:auto;padding:0 18px 18px}
+  .intro .sub{display:block}
+  .hb{grid-template-columns:96px minmax(0,1fr);gap:8px}
+  .rib{grid-template-columns:108px minmax(0,1fr) 26px;gap:6px}
+  .rib .lab{font-size:10px}
+  .flow{flex-direction:column;gap:2px}
+  .arrow{width:auto;height:14px;transform:rotate(90deg)}
+  .ctl .opt{display:none}
+  .big{font-size:44px}
+}
+@media (max-width:640px){
+  .mast{gap:8px;padding:0 8px}
+  .logo small,.logo .word,.mast .avatar,.theme{display:none}
+  .search .go{width:48px}
+  .suggest{right:0}
+  .qi{grid-template-columns:136px minmax(0,1fr)}
+  .owner .who span{display:none}
+  .stack100{gap:4px}
+  .stack100 .col i em{display:none}
+}
+</style>
+</head>
+<body>
+<header class="mast">
+  <button class="burger" id="burger" aria-label="Menu"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg></button>
+  <a class="logo" href="#intro" aria-label="Up Next home"><span class="mark"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 0l11 6-11 6z" fill="#fff"/></svg></span><span class="word">Up Next</span><small>2026</small></a>
+  <form class="search" id="search" role="search" autocomplete="off">
+    <input id="q" aria-label="Search titles or ask a question">
+    <button class="go" aria-label="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button>
+    <div class="suggest" id="suggest"></div>
+  </form>
+  <button class="theme" id="theme" aria-label="Toggle dark mode"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg></button>
+  <span class="avatar" aria-hidden="true">S</span>
+</header>
+<div class="app">
+  <nav class="guide" id="guide"></nav>
+  <main id="view"></main>
+</div>
+<div id="tip"></div>
+<script src="data.js"></script>
+<script>
+const D = window.DATA, M = D.meta;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => n.toLocaleString("en-US");
+const pct = x => Math.round(x * 100) + "%";
+const thumb = id => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+const mmss = s => { s = Math.round(s); return s < 60 ? s + "s" : Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+const hm = m => `${Math.floor(m / 60)}h ${m % 60}m`;
+const hourLabel = h => h === 0 ? "12 AM" : h < 12 ? h + " AM" : h === 12 ? "12 PM" : (h - 12) + " PM";
+const G = D.groups, GC = i => `var(--g${i})`;
+const MAKEUP = 0, GROWTH = 1, FILM = 2, HOBBY = 3;
+const sh = (topic, m) => D.months.share[D.topics.indexOf(topic)][m];
+const lateMakeup = D.hours.band_mix.late[D.topics.indexOf("Makeup & hair")];
+const shade = t => `color-mix(in oklab, var(--cell1) ${Math.round(Math.max(0, Math.min(1, t)) * 100)}%, var(--cell0))`;
+const DAY0 = new Date(D.daily.from + "T12:00:00");
+const dayLabel = d => new Date(DAY0.getTime() + d * 864e5).toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"});
+const P = D.plays; // per play: [card index or -1, night index, hour, month index, session, dwell seconds, topic group]
+const legend = () => `<div class="legend">${G.map((g, i) => `<span><i style="background:${GC(i)}"></i>${g}</span>`).join("")}</div>`;
+const tile = (n, l) => `<div><strong>${n}</strong><span>${l}</span></div>`;
+const att = t => D.attention.find(a => a.topic === t);
+
+const ICON = {
+  play:'<path d="M8 5v14l11-7z"/>',
+  prev:'<path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>',
+  next:'<path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/>',
+  search:'<circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15 16.4l1.4-1.4 5 5-1.4 1.4z"/>',
+  ask:'<path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3zm.9 13.5h-1.8v-1.8h1.8zm1.9-6.3l-.8.8c-.7.7-1.1 1.2-1.1 2.5h-1.8v-.4c0-1 .4-1.9 1.1-2.6l1.1-1.1c.3-.3.5-.8.5-1.3a1.8 1.8 0 0 0-3.6 0H8.4a3.6 3.6 0 0 1 7.2 0c0 .8-.3 1.5-.8 2.1z"/>',
+  video:'<path d="M4 6h12v12H4zm13 4l4-2.5v9L17 14z"/>',
+  code:'<path d="M9.4 16.6L4.8 12l4.6-4.6L8.2 6.2 2.4 12l5.8 5.8zm5.2 0l4.6-4.6-4.6-4.6 1.2-1.2 5.8 5.8-5.8 5.8z"/>',
+};
+const icon = (k, s = 24) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${ICON[k]}</svg>`;
+
+/* ---------- client-side query layer over the per-play table ---------- */
+function topCards(pred, limit = 48) {
+  const k = new Map();
+  for (const p of P) if (p[0] >= 0 && pred(p)) k.set(p[0], (k.get(p[0]) || 0) + 1);
+  return [...k].sort((a, b) => b[1] - a[1] || D.all[b[0]].n - D.all[a[0]].n).slice(0, limit).map(([i, n]) => ({c: D.all[i], k: n}));
+}
+const countPlays = pred => P.reduce((a, p) => a + (pred(p) ? 1 : 0), 0);
+const plays = n => n === 1 ? "1 play" : n + " plays";
+function card(c, badge, meta) {
+  return `<a class="card" href="https://www.youtube.com/watch?v=${c.id}" target="_blank" rel="noopener">
+    <div class="th"><img loading="lazy" src="${thumb(c.id)}" alt=""><span class="badge">${badge}</span></div>
+    <div class="ct">${esc(c.t)}</div>
+    <div class="cm">${esc(c.ch)}<br>${meta || `<span class="tag">${esc(c.topic)}</span> · ${c.n > 1 ? `${c.n} plays, last ${c.last}` : c.first}`}</div></a>`;
+}
+const grid = items => items.length ? `<div class="grid">${items.join("")}</div>` : `<p class="empty">No titled videos here. Deleted videos and blocked topics count in the charts but are never shown.</p>`;
+
+/* ---------- shared numbers ---------- */
+const BANDS = [
+  {k: "late", label: "12–5 AM", lo: 0, hi: 4}, {k: "morning", label: "5 AM–noon", lo: 5, hi: 11},
+  {k: "afternoon", label: "Noon–5 PM", lo: 12, hi: 16}, {k: "evening", label: "5–9 PM", lo: 17, hi: 20},
+  {k: "night", label: "9 PM–midnight", lo: 21, hi: 23},
+];
+const hourTot = D.hours.grid[0].map((_, h) => D.hours.grid.reduce((a, r) => a + r[h], 0));
+const peakHour = hourTot.indexOf(Math.max(...hourTot));
+const dayTot = D.hours.grid.map(r => r.reduce((a, b) => a + b, 0));
+const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const busyDay = DAYS[dayTot.indexOf(Math.max(...dayTot))], quietDay = DAYS[dayTot.indexOf(Math.min(...dayTot))];
+const big = D.holes[0];
+const searchPct = D.searches.gap_bins[0] / D.searches.gap_bins.reduce((a, b) => a + b, 0);
+const holeDays = new Set(D.holes.map(h => P.find(p => p[4] === h.session)[1]));
+// month shares use plays that have a topic, so they match the per-topic panels
+const monthGroups = D.months.labels.map((_, m) => { const s = [0, 0, 0, 0, 0]; let t = 0; D.topics.forEach((tp, i) => { const c = D.months.count[i][m], g = D.topic_group[tp] ?? 4; s[g] += c; t += c; }); return s.map(x => x / t); });
+const monthTagged = D.months.labels.map((_, m) => D.topics.reduce((a, _, i) => a + D.months.count[i][m], 0));
+const gm = D.gate_mix, st = D.sticky;
+const loosest = st.slice(0, 4).indexOf(Math.min(...st.slice(0, 4))), stickiest = st.slice(0, 4).indexOf(Math.max(...st.slice(0, 4)));
+
+/* ---------- chapters ---------- */
+const CH = [
+  {
+    id: "intro", title: `${fmt(M.videos)} videos, parsed`, q: "What I watch on YouTube, when, and how fast I move on.",
+    step: "parse → enrich → classify → analyze", badge: "intro", tint: "#8E2A3E",
+    stage() {
+      return `<div class="stage has-wall" style="padding:0">
+        <div class="wall">${D.all.slice(0, 36).map(c => `<img src="${thumb(c.id)}" alt="">`).join("")}</div><div class="shade"></div>
+        <div class="intro"><div class="kicker">${M.from} – ${M.to}</div><h1>${fmt(M.videos)} videos, parsed.</h1>
+        <div class="sub">Google Takeout only records when each video started. A four-step Python pipeline turns that into sessions, watch time, skips and topics. Each chapter in the queue plays one question.</div></div></div>`;
+    },
+    desc() {
+      return `<div class="stats">${tile(fmt(M.unique), "different videos")}${tile(fmt(M.channels), "channels")}${tile(M.sessions, "sessions")}${tile("~" + M.hours + " h", "estimated watch time")}</div>
+        <p>Watch history only says when a video <b>started</b>. Everything else here (sessions, watch time, skips, topics) is derived, and every chapter shows how under "Show more".</p>
+        <div class="asks">${[0, 1, 2, 3].map(i => `<a class="chip" href="#ask/${i}">${icon("ask", 16)}${esc(ASK[i].q)}</a>`).join("")}</div>`;
+    },
+    method: () => `<h4>The data problem</h4>Takeout's watch history is one 2 MB line of HTML: a verb, a video link, a channel link and a timestamp per entry. No durations, no pauses, no completion. Every behavioral number on this site is inferred from the gaps between timestamps. The full pipeline is chapter ${CH.length}.<h4>What's left out</h4>${fmt(M.excluded)} of ${fmt(M.all_plays)} plays are left out by choice, from every chart and total. Search timing and watch-time gaps were measured on the full history first, so the remaining numbers aren't distorted by the removal.`,
+    lower(f) {
+      const topics = ["All", ...D.topics.filter(x => D.all.some(c => c.topic === x))], t = f || "All";
+      const list = D.all.filter(c => c.n >= 2 && (t === "All" || c.topic === t)).slice(0, 36);
+      return `<h2>Played again and again</h2><p class="lede">${fmt(M.rewatched_videos)} videos got more than one play. ${pct(M.repeat_share)} of all plays were repeats, led by self-help videos.</p>
+        <div class="chips">${topics.map(x => `<a class="chip ${x === t ? "on" : ""}" href="#intro/${encodeURIComponent(x)}">${esc(x)}</a>`).join("")}</div>
+        ${grid(list.map(c => card(c, plays(c.n))))}`;
+    },
+  },
+  {
+    id: "hours", title: "What plays at 3 AM", q: `My busiest hour is ${hourLabel(peakHour)}. After midnight, the queue turns into makeup tutorials.`,
+    step: "enrich.py · local time", badge: "24 h", tint: "#5B3A5E", defaultFilter: "late",
+    stage(f) {
+      const H = D.hours, mx = Math.max(...H.grid.flat()), b = BANDS.find(x => x.k === f);
+      const tick = h => h % 3 === 0 ? (h === 0 ? "12a" : h < 12 ? h + "a" : h === 12 ? "12p" : (h - 12) + "p") : "";
+      return `<div class="stage"><div class="cap"><span><b>Videos started</b> · weekday × hour${b ? ` · ${b.label} highlighted` : ""}</span><span class="scale">fewer<i></i>more</span></div><div class="fill">
+        <div class="heat" style="grid-template-columns:36px repeat(24,minmax(0,1fr));grid-template-rows:repeat(7,1fr) 14px">
+        ${H.days.map((d, i) => `<div class="rl">${d}</div>` + H.grid[i].map((v, h) => `<div class="cell" style="background:${shade(v / mx)};opacity:${b && (h < b.lo || h > b.hi) ? .3 : 1}" data-tip="<b>${d} ${hourLabel(h)}</b><br>${v} videos"></div>`).join("")).join("")}
+        <div></div>${Array.from({length: 24}, (_, h) => `<div class="cl">${tick(h)}</div>`).join("")}</div></div></div>`;
+    },
+    desc() {
+      return `<div class="stats">${tile(hourLabel(peakHour), "busiest hour")}${tile(pct(M.after_midnight), "of videos start after midnight")}${tile(quietDay.slice(0, 3), "quietest day")}</div>
+        <p>Makeup is ${pct(lateMakeup)} of everything I watch between midnight and 5 AM, more than at any other time. Afternoons and early evenings are for <b>mindset and discipline</b>. From 9 PM to midnight it's <b>movie clips and recipes</b>. ${busyDay} is the busiest day (${Math.max(...dayTot)} videos) and ${quietDay} the quietest (${Math.min(...dayTot)}).</p>
+        <div class="panel"><h3>What I watch at each hour</h3><p class="lede">Each column is one hour. Darker = a bigger share of that hour's videos. Faded columns have under 25 videos.</p>${topicHour()}</div>`;
+    },
+    method: () => `Hours come from Takeout's <code>CDT</code>/<code>CST</code> labels, converted with their real UTC offsets so daylight saving can't push a video into the wrong hour. Counts are video starts, not minutes. The time-of-day filter below queries the per-play table in the browser.`,
+    lower(f) {
+      const b = BANDS.find(x => x.k === f) || BANDS[0];
+      const items = topCards(p => p[2] >= b.lo && p[2] <= b.hi);
+      return `<h2>Played ${b.label}</h2><p class="lede">${fmt(countPlays(p => p[2] >= b.lo && p[2] <= b.hi))} plays in this window. Top topic: <b>${esc(D.hours.peak_band[b.k])}</b>.</p>
+        <div class="chips">${BANDS.map(x => `<a class="chip ${x.k === b.k ? "on" : ""}" href="#hours/${x.k}">${x.label}<small>${countPlays(p => p[2] >= x.lo && p[2] <= x.hi)}</small></a>`).join("")}</div>
+        ${grid(items.map(({c, k}) => card(c, plays(k))))}`;
+    },
+  },
+  {
+    id: "seasons", title: "Ten months, four obsessions", q: "Makeup ran the winter, self-help took the spring and summer, TED talks took September.",
+    step: "classify.py · topics by month", badge: "10 mo", tint: "#A77A1C", defaultFilter: "0",
+    stage(f) {
+      const L = D.months.labels, sel = +f;
+      return `<div class="stage"><div class="cap"><span><b>Share of each month</b> · click a month</span>${legend()}</div><div class="fill"><div class="stack100">
+        ${L.map((l, m) => `<a class="col ${m === sel ? "sel" : ""}" href="#seasons/${m}">${monthGroups[m].map((v, g) => `<i style="flex:${v};background:${GC(g)}" data-tip="<b>${l}</b> · ${G[g]}<br>${pct(v)} of ${monthTagged[m]} tagged videos">${v >= .14 ? `<em>${pct(v)}</em>` : ""}</i>`).join("")}<span>${l}</span></a>`).join("")}
+      </div></div></div>`;
+    },
+    desc() {
+      return `<p><b>January:</b> makeup (${pct(D.months.share[D.topics.indexOf("Makeup & hair")][0])}) and romance-movie clips (${pct(D.months.share[D.topics.indexOf("Film & TV")][0])}). <b>April:</b> mindset, ${pct(sh("Mindset & discipline", 3))}. <b>May:</b> mindset and calm together, ${pct(sh("Mindset & discipline", 4) + sh("Calm & wellbeing", 4))}. <b>June:</b> femininity peaks at ${pct(sh("Femininity & dating", 5))}. <b>July:</b> mindset again, ${pct(sh("Mindset & discipline", 6))}. <b>August:</b> makeup again, ${pct(sh("Makeup & hair", 7))}. <b>September:</b> TED talks, ${pct(sh("Talks & ideas", 8))}, the week I saved a TED playlist. October only has ${D.months.total[9]} videos, so read it lightly.</p>
+        <div class="panel"><h3>Every topic, month by month</h3><p class="lede">Share of that month's videos. All panels share one scale; the dark bar is each topic's peak.</p>${multiples()}</div>`;
+    },
+    method: () => `Share = a group's plays ÷ that month's plays that have a topic (untagged, deleted and blocked videos are left out). All plays per month: ${D.months.labels.map((l, i) => `${l} ${D.months.total[i]}`).join(", ")}. January starts on the 16th and October ends on the 2nd. Groups: Self-growth = mindset, femininity, calm, talks; Food & hobbies = food, sports, art.`,
+    lower(f) {
+      const m = +f, L = D.months.labels;
+      return `<h2>Most played in ${L[m]}</h2><p class="lede">${D.months.total[m]} plays that month.</p>
+        <div class="chips">${L.map((l, i) => `<a class="chip ${i === m ? "on" : ""}" href="#seasons/${i}">${l}<small>${D.months.total[i]}</small></a>`).join("")}</div>
+        ${grid(topCards(p => p[3] === m).map(({c, k}) => card(c, plays(k))))}`;
+    },
+  },
+  {
+    id: "attention", title: `${att("Makeup & hair").dwell} seconds for makeup, ${Math.floor(att("Femininity & dating").dwell / 60)} minutes for femininity`, q: "How long I stay on a video before the next one starts. Makeup gets skimmed; confidence and charisma videos get watched.",
+    step: "enrich.py · dwell = next start − this start", badge: pct(M.skip_rate) + " skip", tint: "#2F5D50", defaultFilter: "Femininity & dating",
+    stage(f) {
+      const A = [...D.attention].sort((a, b) => b.dwell - a.dwell), mx = A[0].dwell;
+      return `<div class="stage"><div class="cap"><span><b>Median time before the next video</b> · click a topic</span><span>${pct(M.skip_rate)} of all videos replaced within a minute</span></div><div class="fill"><div class="hbars">
+        ${A.map(a => `<a class="hb ${a.topic === f ? "sel" : ""}" href="#attention/${encodeURIComponent(a.topic)}" data-tip="<b>${esc(a.topic)}</b><br>median ${mmss(a.dwell)} · ${pct(a.skip)} left within a minute · ${fmt(a.n)} plays"><span class="lab">${esc(a.topic)}</span><span class="bar"><i style="width:${a.dwell / mx * 80}%;opacity:${a.topic === f ? 1 : .55}"></i><em style="left:${a.dwell / mx * 80}%">${mmss(a.dwell)}</em></span></a>`).join("")}
+      </div></div></div>`;
+    },
+    desc() {
+      const mk = att("Makeup & hair"), fem = att("Femininity & dating"), mind = att("Mindset & discipline");
+      const sc = D.skip_channels, most = sc.slice(0, 3), least = sc.slice(-3).reverse();
+      return `<div class="stats">${tile(mmss(mk.dwell), "typical makeup video")}${tile(pct(mk.skip), "of makeup skipped")}${tile(mmss(fem.dwell), "typical femininity video")}${tile(pct(fem.skip), "of femininity skipped")}</div>
+        <p>Makeup and food are browsed like a catalog: tap, look, next. More than half are gone within a minute. Mindset videos hold me for ${mmss(mind.dwell)}, femininity videos for over five minutes.</p>
+        <div class="panel"><h3>Channels I skip, channels I stay for</h3><p class="lede">Channels with 10+ plays, by share of plays left within a minute</p>
+        <table class="table"><tr><th>Most skipped</th><th></th><th>Most watched through</th><th></th></tr>
+        ${most.map((m, i) => `<tr><td>${esc(m.name)}</td><td class="mono">${pct(m.skip)} of ${m.n}</td><td>${esc(least[i].name)}</td><td class="mono">${pct(least[i].skip)} of ${least[i].n}</td></tr>`).join("")}</table></div>`;
+    },
+    method: () => `Takeout has no durations, so attention is estimated: the gap from one video's start to the next video's start in the same session, capped at ${D.pipeline.dwell_cap} minutes. The last video of each session has no successor; it gets its session's median and is left out of skip rates. Short gaps also catch Shorts, which this export can't tell apart from regular videos. True completion rates would need each video's length from the YouTube Data API, which this project doesn't call yet.`,
+    lower(f) {
+      const t = f, tops = D.attention.map(a => a.topic).filter(x => D.all.some(c => c.topic === x));
+      const list = D.all.filter(c => c.topic === t).sort((a, b) => b.dw - a.dw || b.n - a.n).slice(0, 36);
+      return `<h2>${esc(t)}, longest watched first</h2><p class="lede">The badge is the median time I stayed before the next video.</p>
+        <div class="chips">${tops.map(x => `<a class="chip ${x === t ? "on" : ""}" href="#attention/${encodeURIComponent(x)}">${esc(x)}<small>${mmss(att(x).dwell)}</small></a>`).join("")}</div>
+        ${grid(list.map(c => card(c, mmss(c.dw))))}`;
+    },
+  },
+  {
+    id: "holes", title: "One makeup video leads to the next", q: "Most sessions are two videos. Once a topic starts, it usually keeps going.",
+    step: "enrich.py · 30-min session gap", badge: `${big.videos} videos`, tint: "#8E2A3E", defaultFilter: String(big.session),
+    stage(f) {
+      const mx = big.videos, sel = +f;
+      return `<div class="stage"><div class="cap"><span><b>The 12 longest sessions</b> · one block per video, in order · click one</span>${legend()}</div><div class="fill"><div class="ribbons">
+        ${D.holes.map(h => `<a class="rib ${h.session === sel ? "sel" : ""}" href="#holes/${h.session}" data-tip="<b>${h.date}, ${h.start}</b><br>${h.videos} videos in ${hm(h.minutes)}${h.gate >= 0 ? `<br>opens with: ${esc(D.all[h.gate].t)}` : ""}">
+          <span class="lab"><b>${h.date}</b> · ${h.start}</span>
+          <span class="line" style="width:${h.videos / mx * 100}%">${h.seq.map(g => `<i style="background:${GC(g)}"></i>`).join("")}</span>
+          <span class="n">${h.videos}</span></a>`).join("")}
+      </div></div></div>`;
+    },
+    desc() {
+      return `<div class="stats">${tile(M.median_session_videos, "videos in a typical session")}${tile(gm.n_long, "sessions of 10+ videos")}${tile(pct(st[MAKEUP]), "makeup → makeup")}${tile(pct(st[GROWTH]), "self-growth → self-growth")}</div>
+        <p><b>Topics are sticky.</b> After a makeup video, the next one is makeup too ${pct(st[MAKEUP])} of the time: one tutorial leads to the next. Self-growth stays self-growth ${pct(st[GROWTH])} of the time. Film & TV is the loosest (${pct(st[FILM])}); a movie clip is where I drift into something else.</p>
+        <p>The longest: <b>${big.date}, ${big.start}</b>, ${big.videos} videos in ${hm(big.minutes)}, about ${Math.round(big.minutes * 60 / big.videos)} seconds each.</p>
+        <div class="panel"><h3>What comes next</h3><p class="lede">Rows: a video's topic group. Columns: the next video's group, same session. Share of the row.</p>${matrix()}</div>`;
+    },
+    method: () => `A session ends after ${D.pipeline.session_gap} minutes with no new video start. Long = 10+ videos (${gm.n_long} sessions). "What comes next" counts consecutive pairs inside a session (${fmt(D.transitions.flat().reduce((a, b) => a + b, 0))} pairs). Each ribbon block is one video, so ribbon length is the session's video count. "Other" here also includes untagged, deleted and blocked videos.`,
+    lower(f) {
+      const h = D.holes.find(x => x.session === +f) || big;
+      const seen = new Set(), seq = [];
+      P.forEach(p => { if (p[4] === h.session && p[0] >= 0 && !seen.has(p[0])) { seen.add(p[0]); seq.push(p[0]); } });
+      return `<h2>${h.date}, ${h.start}, in order</h2><p class="lede">${h.videos} videos; ${seq.length} distinct titled videos shown.</p>
+        <div class="chips">${D.holes.map(x => `<a class="chip ${x.session === h.session ? "on" : ""}" href="#holes/${x.session}">${x.date}<small>${x.videos}</small></a>`).join("")}</div>
+        ${grid(seq.map((i, n) => card(D.all[i], "#" + (n + 1))))}`;
+    },
+  },
+  {
+    id: "channels", title: `${D.pareto.for50} channels make half of everything`, q: `${fmt(M.channels)} channels, ${fmt(M.channels_once)} of them watched exactly once.`,
+    step: "parse.py · grouped by channel ID", badge: `${D.pareto.for50} / ${fmt(M.channels)}`, tint: "#A77A1C",
+    stage() {
+      const p = D.pareto, n = p.n, pts = p.cum.map((c, i) => `${(i + 1) / n * 100},${100 - c * 100}`).join(" ");
+      return `<div class="stage"><div class="cap"><span><b>Cumulative share of plays</b> · channels ranked by plays</span><span>${fmt(n)} channels</span></div><div class="fill">
+        <div class="pareto">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="50" x2="100" y2="50" stroke="#3a3a3a" vector-effect="non-scaling-stroke"/><line x1="0" y1="20" x2="100" y2="20" stroke="#3a3a3a" vector-effect="non-scaling-stroke"/><line x1="0" y1="0" x2="100" y2="0" stroke="#3a3a3a" vector-effect="non-scaling-stroke"/>
+          <polygon points="0,100 ${pts} 100,100" fill="#D0607A" fill-opacity=".14"/><polyline points="0,100 ${pts}" fill="none" stroke="#D0607A" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+          <span class="ax" style="top:50%">50%</span><span class="ax" style="top:20%">80%</span><span class="ax" style="top:0">100%</span>
+          <span class="mk" style="left:${p.for50 / n * 100}%;top:50%"><b>${p.for50}</b>channels = half of all plays</span>
+          <span class="mk" style="left:${p.for80 / n * 100}%;top:20%"><b>${p.for80}</b>channels = 80%</span>
+        </div></div></div>`;
+    },
+    desc() {
+      const L = D.channels.loyalty, reg = L[L.length - 1];
+      return `<div class="stats">${tile(fmt(M.channels), "channels")}${tile(pct(M.channels_once / M.channels), "watched once")}${tile(reg.n, "regulars (10+ plays)")}${tile(pct(M.subs_share), "of plays from subscriptions")}</div>
+        <p>${pct(M.channels_once / M.channels)} of channels got one video and never came back, yet ${D.pareto.for50} channels supply half of everything I watch. ${reg.n} regulars with 10+ plays, ${pct(reg.n / M.channels)} of channels, account for ${pct(reg.videos / M.videos)} of all plays. Only ${M.subs_watched} of my ${M.subs} subscriptions got watched at all; ${pct(1 - M.subs_share)} of plays come from search and recommendations.</p>`;
+    },
+    method: () => `Channels are grouped by channel ID, so a renamed channel doesn't split in two. ${D.pipeline.deleted} videos were deleted by their creators; YouTube keeps only their URL, so they have no channel. The curve uses every channel; the list below leaves out channels whose videos are mostly on the blocked-topics list.`,
+    lower(f) {
+      const top = D.channels.top.filter(c => D.all.some(x => x.ch === c.name)), name = f || top[0].name;
+      return `<h2>${esc(name)}</h2><p class="lede">Pick a regular to see what I watched from them.</p>
+        <div class="chips">${top.map(c => `<a class="chip ${c.name === name ? "on" : ""}" href="#channels/${encodeURIComponent(c.name)}">${esc(c.name)}<small>${c.n}</small></a>`).join("")}</div>
+        ${grid(D.all.filter(c => c.ch === name).map(c => card(c, plays(c.n))))}`;
+    },
+  },
+  {
+    id: "search", title: "Searched, clicked, done", q: `${pct(searchPct)} of my searches turn into a video within a minute.`,
+    step: "analyze.py · numpy.searchsorted", badge: pct(searchPct), tint: "#3E4E6B",
+    stage() {
+      const g = D.searches.gap_bins, tot = g.reduce((a, b) => a + b, 0), mx = Math.max(...g), lab = ["Within a minute", "1–5 minutes", "5–60 minutes", "Later or never"];
+      return `<div class="stage"><div class="cap"><span><b>Time from a search to the next video</b></span><span>${fmt(M.searches)} searches</span></div><div class="fill" style="display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center">
+        <div><div class="big">${pct(searchPct)}</div><div style="color:var(--ink-2);margin-top:6px">click a result<br>within 60 seconds</div></div>
+        <div class="hbars">${g.map((v, i) => `<div class="hb" style="cursor:default" data-tip="${v} searches (${pct(v / tot)})"><span class="lab">${lab[i]}</span><span class="bar"><i style="width:${v / mx * 78}%"></i><em style="left:${v / mx * 78}%">${pct(v / tot)}</em></span></div>`).join("")}</div>
+      </div></div>`;
+    },
+    desc() {
+      const sg = D.search_led_groups;
+      return `<p>I search for something specific and click it; I don't browse results. Self-growth is ${pct(sg[GROWTH])} of the videos I go looking for, makeup ${pct(sg[MAKEUP])}, and film ${pct(sg[FILM])}.</p>`;
+    },
+    method: () => `Search text never leaves my laptop; only search timestamps are used. Each one is matched to the next video start with a binary search over the sorted watch times (<code>numpy.searchsorted</code>, O(log n) per search). The videos below started within 60 seconds of a search.`,
+    lower() {
+      return `<h2>Videos I searched for</h2><p class="lede">${D.search_led.length} titled videos started within a minute of a search. The searches themselves stay private.</p>
+        ${grid(D.search_led.slice(0, 48).map(i => card(D.all[i], plays(D.all[i].n))))}`;
+    },
+  },
+  {
+    id: "later", title: `${D.watch_later_watched} of ${D.watch_later_total} watched`, q: "Saved for later: investing, charisma, college advice. Most are still waiting.",
+    step: "playlists CSV + YouTube oEmbed", badge: `${D.watch_later_total - D.watch_later_watched} left`, tint: "#B97979",
+    stage() {
+      const wl = D.watch_later.slice(0, 5);
+      return `<div class="stage"><div class="cap"><span><b>Watch later</b> · saved since June 2025</span><span>${D.watch_later_total - D.watch_later_watched} never played</span></div><div class="fill" style="display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center">
+        <div><div class="big">${D.watch_later_watched}<span style="color:#666"> / ${D.watch_later_total}</span></div><div style="color:var(--ink-2);margin-top:6px">watched</div></div>
+        <div class="cascade">${wl.map((w, i) => `<img src="${thumb(w.id)}" alt="" style="left:${2 + i * 13}%;top:${12 + (i % 2) * 26}%;transform:rotate(${[-5, 3, -2, 5, -3][i]}deg);${w.watched ? "" : "filter:grayscale(.5) brightness(.85)"}">`).join("")}</div>
+      </div></div>`;
+    },
+    desc: () => `<p>Watch later is where good intentions go: ${D.watch_later_total} saved, ${D.watch_later_watched} ever played, the oldest from June 2025.</p>`,
+    method: () => `<code>playlists/Watch later-videos.csv</code> has video IDs and dates, no titles. Titles come from YouTube's public oEmbed endpoint, cached locally. "Watched" means the ID appears anywhere in watch history. ${D.watch_later_total - D.watch_later.length} saved videos are private, deleted, or hidden by the topic filter.`,
+    lower() {
+      return `<h2>Saved</h2><p class="lede">Thumbnails link to YouTube.</p>${grid(D.watch_later.map(w => card({...w, t: w.t || "Unavailable video"}, w.watched ? "watched" : "unplayed", `saved ${w.added}`)))}`;
+    },
+  },
+  {
+    id: "built", title: "How it's built", q: "From one line of HTML to a page that queries every play in the browser.",
+    step: "the whole pipeline", badge: "5 steps", tint: "#8E2A3E",
+    stage() {
+      const Pp = D.pipeline;
+      const node = (k, b, s, io) => `<div class="node"><span class="k">${k}</span><b>${b}</b><span>${s}</span><span class="io">${io}</span></div>`;
+      const ar = `<span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l8 7-8 7z"/></svg></span>`;
+      return `<div class="stage"><div class="cap"><span><b>Pipeline</b> · Python · pandas · scikit-learn · vanilla JS</span><span>runs locally, no paid APIs</span></div><div class="fill"><div class="flow">
+        ${node("Takeout", "Google export", "watch + search history as HTML; playlists, subscriptions as CSV", `${fmt(Pp.cells)} cells`)}${ar}
+        ${node("parse.py", "Parse", "regex over activity cells; each one parsed or counted as dropped", `${fmt(Pp.rows.watches)} rows → parquet`)}${ar}
+        ${node("enrich.py", "Sessionize", `30-min gap starts a session; dwell = gap to the next start`, `${M.sessions} sessions`)}${ar}
+        ${node("classify.py", "Topics", "keyword rules → channel majority → MiniLM embeddings + logistic regression", `${pct(Pp.agreement)} held-out agreement`)}${ar}
+        ${node("analyze.py", "Filter + export", "privacy filters, aggregates, per-play table", `${fmt(D.plays.length)} plays → data.js`)}${ar}
+        ${node("index.html", "Render", "queries the play table in the browser; hand-built charts", `${fmt(D.all.length)} titles`)}
+      </div></div></div>`;
+    },
+    desc() {
+      return `<div class="stats">${tile(fmt(D.pipeline.cells), "HTML cells parsed")}${tile(Object.values(D.pipeline.dropped).reduce((a, b) => a + b, 0), "dropped, with reasons")}${tile(pct(D.pipeline.agreement), "topic model agreement")}${tile(D.pipeline.off_limits, "videos blocked")}</div>
+        <p><b>Why a YouTube layout.</b> Visitors already know how to read this page. Each part of it carries data instead of video:</p>
+        <table class="table"><tr><th>YouTube part</th><th>Here</th></tr>
+          <tr><td>Video player</td><td>The chapter's main chart, on a dark frame in every theme</td></tr>
+          <tr><td>Progress bar</td><td>All ${D.daily.n.length} days, one bar per night; click one to see what played</td></tr>
+          <tr><td>Up next</td><td>The chapters, each a question with a mini chart as its thumbnail</td></tr>
+          <tr><td>Description, "Show more"</td><td>The findings, then the method behind them</td></tr>
+          <tr><td>Chips under the video</td><td>Filters that query the per-play table in the browser</td></tr>
+          <tr><td>Search bar</td><td>Keyword search over ${fmt(D.all.length)} titles, plus ${ASK.length} questions answered from the data</td></tr></table>
+        <div class="panel"><h3>If I built this for YouTube</h3>
+          <p><b>History by intent, not date.</b> My history mixes catalog-browsing (makeup, ${pct(att("Makeup & hair").skip)} skipped) with videos I sit through (femininity, ${mmss(att("Femininity & dating").dwell)}). A "videos I finished" filter would make history useful.</p>
+          <p><b>A gentler after-midnight.</b> ${pct(M.after_midnight)} of my videos start between midnight and 5 AM. That's the moment for a wind-down prompt, not another autoplay.</p>
+          <p><b>A seasons recap.</b> My topics turn over every few months. A personal obsession timeline would say more than a top-videos list.</p></div>`;
+    },
+    method() {
+      const Pp = D.pipeline, src = Pp.sources;
+      return `<h4>Data governance</h4>Raw exports and parquet tables stay on my laptop and out of git. Search queries never reach this page, only their timestamps. Titles matching a private blocked-topic list never get a topic, so they can't reach a chart label, shelf or search result; they still count in totals. ${fmt(M.excluded)} of ${fmt(M.all_plays)} plays are left out of the site by choice, charts and totals included. Emojis are stripped.
+        <h4>Topic labels</h4>${src.rules} by keyword rules, ${src.channel} by channel majority, ${src.model} by the embedding model (kept only at 55%+ confidence), ${src.none} without a topic (deleted, blocked or uncertain). The model agrees with the rules on ${pct(Pp.agreement)} of held-out titles. Treat topics as trends, not per-video truth.
+        <h4>Known limits</h4>No durations, so watch time and skips are estimates. Shorts and regular videos look the same in this export. History begins January 16, 2026, because that's as far back as the account kept it.
+        <h4>Code</h4><a href="https://github.com/suhxnitiwari/up-next" style="color:var(--wine)">github.com/suhxnitiwari/up-next</a>`;
+    },
+    lower: () => "",
+  },
+];
+const CHI = Object.fromEntries(CH.map((c, i) => [c.id, i]));
+
+/* ---------- supporting charts (page surface) ---------- */
+function topicHour() {
+  const th = D.hours.topic_hour, colTot = th[0].map((_, h) => th.reduce((a, r) => a + r[h], 0));
+  const tick = h => h % 3 === 0 ? (h === 0 ? "12a" : h < 12 ? h + "a" : h === 12 ? "12p" : (h - 12) + "p") : "";
+  return `<div class="heat" style="grid-template-columns:140px repeat(24,minmax(0,1fr));grid-auto-rows:20px">
+    ${D.topics.map((t, i) => `<div class="rl">${esc(t)}</div>` + th[i].map((v, h) => { const s = colTot[h] ? v / colTot[h] : 0;
+      return `<div class="cell" style="background:${shade(s / .45)};opacity:${colTot[h] < 25 ? .45 : 1}" data-tip="<b>${hourLabel(h)}</b> · ${esc(t)}<br>${v} of ${colTot[h]} videos (${pct(s)})"></div>`; }).join("")).join("")}
+    <div></div>${Array.from({length: 24}, (_, h) => `<div class="cl">${tick(h)}</div>`).join("")}</div>`;
+}
+function multiples() {
+  const S = D.months, L = S.labels;
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">${D.topics.map((t, i) => {
+    const sh = S.share[i], mx = Math.max(...sh), pk = sh.indexOf(mx);
+    return `<div style="background:var(--bg);border-radius:10px;padding:10px 12px"><div style="display:flex;justify-content:space-between;gap:6px;font-size:13px;font-weight:500">${esc(t)}<span style="color:var(--ink-2);font-weight:400;font-size:11px;white-space:nowrap">peak ${L[pk]} ${pct(mx)}</span></div>
+      <div style="display:flex;align-items:flex-end;gap:3px;height:54px;margin-top:8px">${sh.map((v, m) => `<i style="flex:1;height:${Math.max(2, v / .62 * 100)}%;border-radius:2px 2px 0 0;background:${m === pk ? "var(--wine)" : "color-mix(in oklab,var(--wine) 30%,var(--cell0))"}" data-tip="<b>${L[m]}</b> · ${esc(t)}<br>${S.count[i][m]} of ${S.total[m]} (${pct(v)})"></i>`).join("")}</div></div>`;
+  }).join("")}</div>`;
+}
+function matrix() {
+  const T = D.transitions;
+  return `<div class="mat" style="grid-template-columns:104px repeat(5,minmax(0,1fr));max-width:620px"><div class="h"></div>${G.map(g => `<div class="h hc">${g}</div>`).join("")}
+    ${T.map((r, i) => { const s = r.reduce((a, b) => a + b, 0); return `<div class="h">${G[i]} →</div>` + r.map((v, j) => `<div style="background:${shade(v / s)};color:${v / s > .5 ? "#fff" : "var(--ink)"}" data-tip="<b>${G[i]} → ${G[j]}</b><br>${v} of ${s} pairs">${pct(v / s)}</div>`).join(""); }).join("")}</div>`;
+}
+
+/* ---------- questions answered from the data ---------- */
+const sk = D.skip_channels, topRe = D.all[0];
+const ASK = [
+  {q: "What was my longest session?", a: `<b>${big.date}, ${big.start}</b>: ${big.videos} videos in ${hm(big.minutes)}.`, go: `holes/${big.session}`},
+  {q: "What started my longest session?", a: big.gate >= 0 ? `<b>${esc(D.all[big.gate].t)}</b>` : "A video that's since been deleted.", go: `holes/${big.session}`},
+  {q: "Which channels do I skip the most?", a: `<b>${esc(sk[0].name)}</b>: ${pct(sk[0].skip)} of ${sk[0].n} plays left within a minute.`, go: "attention/Makeup & hair"},
+  {q: "What do I watch after midnight?", a: `<b>Makeup</b>: ${pct(lateMakeup)} of everything between midnight and 5 AM.`, go: "hours/late"},
+  {q: "Which channels hold my attention?", a: `<b>${esc(sk[sk.length - 1].name)}</b>, ${esc(sk[sk.length - 2].name)} and ${esc(sk[sk.length - 3].name)}: ${pct(sk[sk.length - 3].skip)} or less skipped.`, go: "attention/Mindset & discipline"},
+  {q: "What's my busiest hour?", a: `<b>${hourLabel(peakHour)}</b>, with ${hourTot[peakHour]} videos started.`, go: `hours/${(BANDS.find(b => peakHour >= b.lo && peakHour <= b.hi) || BANDS[0]).k}`},
+  {q: "How many channels make up half my watching?", a: `<b>${D.pareto.for50}</b> of ${fmt(M.channels)}.`, go: "channels"},
+  {q: "When did self-help peak?", a: `<b>April</b>: mindset videos were ${pct(D.months.share[D.topics.indexOf("Mindset & discipline")][3])} of the month.`, go: "seasons/3"},
+  {q: "What did I rewatch the most?", a: `<b>${esc(topRe.t)}</b>, ${topRe.n} plays.`, go: "intro"},
+  {q: "Do my searches turn into videos?", a: `<b>${pct(searchPct)}</b> become a video within a minute.`, go: "search"},
+  {q: "How much did I watch?", a: `About <b>${M.hours} hours</b>, estimated from the gaps between videos.`, go: "attention"},
+  {q: "Which day do I watch least?", a: `<b>${quietDay}</b>: ${Math.min(...dayTot)} videos, against ${Math.max(...dayTot)} on ${busyDay}s.`, go: "hours"},
+  {q: "What leads to what?", a: `After a makeup video, the next one is makeup too <b>${pct(st[MAKEUP])}</b> of the time.`, go: "holes"},
+  {q: "How was watch time estimated?", a: `The gap to the next video's start, capped at <b>${D.pipeline.dwell_cap} min</b>.`, go: "built"},
+  {q: "How accurate are the topics?", a: `The model agrees with the rules on <b>${pct(D.pipeline.agreement)}</b> of held-out titles.`, go: "built"},
+];
+
+/* ---------- view ---------- */
+function upNextThumb(id) {
+  const W = 168, H = 94;
+  if (id === "intro") return `<img src="${thumb(D.all[0].id)}" alt="">`;
+  if (id === "hours") { const mx = Math.max(...hourTot); return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${hourTot.map((v, h) => `<rect x="${8 + h * 6.4}" y="${H - 10 - v / mx * 64}" width="4.6" height="${v / mx * 64}" rx="1.5" fill="#D0607A" fill-opacity="${h <= 4 ? 1 : .4}"/>`).join("")}</svg>`; }
+  if (id === "seasons") return `<svg viewBox="0 0 ${W} ${H}">${D.months.labels.map((_, m) => { let y = H - 10; return monthGroups[m].map((v, g) => { const h = v * 72; y -= h; return `<rect x="${12 + m * 15}" y="${y}" width="11" height="${Math.max(0, h - 1)}" fill="${["#C04A67", "#A97814", "#23926F", "#6A86D0", "#5f5f5f"][g]}"/>`; }).join(""); }).join("")}</svg>`;
+  if (id === "attention") { const a = [...D.attention].sort((x, y) => y.dwell - x.dwell).slice(0, 6), mx = a[0].dwell; return `<svg viewBox="0 0 ${W} ${H}">${a.map((r, i) => `<rect x="12" y="${12 + i * 12}" width="${r.dwell / mx * 140}" height="7" rx="2" fill="#D0607A" fill-opacity="${1 - i * .13}"/>`).join("")}</svg>`; }
+  if (id === "holes") return `<div class="stack">${D.holes.filter(h => h.gate >= 0).slice(0, 3).reverse().map(h => `<img src="${thumb(D.all[h.gate].id)}" alt="">`).join("")}</div>`;
+  if (id === "channels") { const pts = D.pareto.cum.map((c, i) => `${10 + (i / D.pareto.n) * 148},${H - 10 - c * 72}`).join(" "); return `<svg viewBox="0 0 ${W} ${H}"><polyline fill="none" stroke="#D0607A" stroke-width="2.2" points="10,${H - 10} ${pts}"/></svg>`; }
+  if (id === "search") return `<svg viewBox="0 0 ${W} ${H}"><text x="14" y="58" font-family="Roboto Mono" font-size="34" font-weight="500" fill="#fff">${pct(searchPct)}</text></svg>`;
+  if (id === "later") return D.watch_later[0] ? `<img src="${thumb(D.watch_later[0].id)}" alt="" style="filter:grayscale(.4)">` : "";
+  if (id === "built") return `<svg viewBox="0 0 ${W} ${H}">${["parse.py", "enrich.py", "classify.py", "analyze.py"].map((t, i) => `<text x="14" y="${24 + i * 18}" font-family="Roboto Mono" font-size="11" fill="${i === 2 ? "#D0607A" : "#aaa"}">${t}</text>`).join("")}</svg>`;
+  return "";
+}
+function scrub(chId, day) {
+  const n = D.daily.n, mx = Math.max(...n);
+  return `<div class="scrub" id="scrub">${n.map((v, d) => `<i data-day="${d}" class="${chId === "holes" && holeDays.has(d) ? "hot" : ""}${d === day ? " sel" : ""}" style="height:${Math.max(6, v / mx * 100)}%" data-tip="<b>${dayLabel(d)}</b><br>${v} video${v === 1 ? "" : "s"}${v ? " · click to see them" : ""}"></i>`).join("")}</div><div class="scrub-base"></div>`;
+}
+function dayLower(d) {
+  const items = topCards(p => p[1] === d, 200), n = D.daily.n[d];
+  return `<h2>${dayLabel(d)}</h2><p class="lede">${n} video${n === 1 ? "" : "s"} that night (a night runs until 5 AM); ${items.length} titled videos shown. Click any bar in the progress bar to pick another night.</p>${grid(items.map(({c, k}) => card(c, plays(k))))}`;
+}
+function searchLower(q) {
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const hits = D.all.filter(c => { const s = (c.t + " " + c.ch + " " + c.topic).toLowerCase(); return words.every(w => s.includes(w)); });
+  return `<h2>“${esc(q)}”</h2><p class="lede">${hits.length} matching title${hits.length === 1 ? "" : "s"}. Keyword search over ${fmt(D.all.length)} titles, channels and topics.</p>${grid(hits.slice(0, 60).map(c => card(c, plays(c.n))))}`;
+}
+function render(chId, f, opts = {}) {
+  const i = CHI[chId] ?? 0, ch = CH[i], filt = f === undefined ? ch.defaultFilter : f;
+  const a = opts.ask !== undefined ? ASK[opts.ask] : null;
+  const lower = opts.day !== undefined ? dayLower(opts.day) : opts.search !== undefined ? searchLower(opts.search) : ch.lower(filt);
+  const prev = CH[(i - 1 + CH.length) % CH.length], next = CH[(i + 1) % CH.length];
+  $("#view").innerHTML = `<div class="watch"><div class="primary">
+      ${a ? `<div class="answer">${icon("ask", 20)}<div><div class="q">${esc(a.q)}</div>${a.a}</div><a class="x" href="#${a.go}" aria-label="Dismiss">×</a></div>` : ""}
+      <div class="stage-wrap"><div class="ambient" style="background:radial-gradient(60% 60% at 30% 50%, ${ch.tint}, transparent 70%),radial-gradient(50% 60% at 75% 50%, #A77A1C66, transparent 70%)"></div>
+      <div class="player">${ch.stage(filt)}
+        <div class="controls">${scrub(ch.id, opts.day)}
+          <div class="ctl"><a href="#${prev.id}" aria-label="Previous chapter">${icon("prev", 22)}</a><span>${icon("play", 22)}</span><a href="#${next.id}" aria-label="Next chapter">${icon("next", 22)}</a>
+          <span class="mono">${i + 1} / ${CH.length}</span><span class="chap">${esc(ch.title)}</span><span class="sp"></span><span class="opt mono">${M.from} – ${M.to}</span></div></div></div></div>
+      <div class="vtitle">${esc(ch.title)}</div>
+      <div class="owner"><span class="avatar">S</span><div class="who"><b>Up Next</b><span>${esc(ch.step)}</span></div><span style="flex:1"></span>
+        <a class="pill" href="#${next.id}">Next chapter ${icon("next", 18)}</a>
+        <a class="pill dark" href="#built">${icon("code", 18)} How it's built</a></div>
+      <div class="desc"><p style="color:var(--ink-2)">${esc(ch.q)}</p>${ch.desc()}
+        <button class="more" id="more">Show more: how this was computed</button><div class="method" id="method">${ch.method()}</div></div>
+    </div>
+    <aside class="secondary"><h3>Up next <span>${CH.length} chapters</span></h3>
+      ${CH.map((c, k) => `<a class="qi ${k === i ? "now" : ""}" href="#${c.id}"><div class="qthumb">${upNextThumb(c.id)}${k === i ? '<span class="badge now">Now playing</span>' : ""}<span class="badge">${esc(c.badge)}</span></div>
+        <div><div class="qt">${k + 1}. ${esc(c.title)}</div><div class="qm">${esc(c.q)}<br><span class="step">${esc(c.step)}</span></div></div></a>`).join("")}
+    </aside></div>
+    <section class="lower">${lower}</section>`;
+  document.querySelectorAll(".guide a[data-id]").forEach(x => x.classList.toggle("on", x.dataset.id === ch.id));
+  $("#more").onclick = e => { const m = $("#method"); m.classList.toggle("open"); e.target.textContent = m.classList.contains("open") ? "Show less" : "Show more: how this was computed"; };
+  $("#scrub").onclick = e => { const d = e.target.dataset.day; if (d !== undefined && D.daily.n[d]) location.hash = `${ch.id}/day/${d}`; };
+}
+
+/* ---------- router: #chapter, #chapter/filter, #chapter/day/N, #ask/N, #search?q= ---------- */
+function route() {
+  const raw = decodeURIComponent(location.hash.slice(1)) || "intro";
+  const y = scrollY, last = route.last;
+  if (raw.startsWith("search?q=")) { const q = raw.slice(9); $("#q").value = q; render("intro", undefined, {search: q}); }
+  else if (raw.startsWith("ask/")) { const k = +raw.slice(4), a = ASK[k] || ASK[0]; const [c, ...rest] = a.go.split("/"); render(c, rest.length ? rest.join("/") : undefined, {ask: k}); }
+  else { const [c, ...rest] = raw.split("/"); if (rest[0] === "day") render(c, undefined, {day: +rest[1]}); else render(c, rest.length ? rest.join("/") : undefined); }
+  const now = raw.split(/[/?]/)[0];
+  window.scrollTo(0, now === last ? y : 0);
+  route.last = now;
+  document.body.classList.remove("nav-open");
+}
+const SHORT = {intro: "Home", hours: "What plays at 3 AM", seasons: "Ten months", attention: "Attention", holes: "Rabbit holes", channels: "Channels", search: "Searches", later: "Watch later", built: "How it's built"};
+$("#guide").innerHTML = CH.map((c, i) => (i === 1 ? "<hr><h4>Chapters</h4>" : i === CH.length - 1 ? "<hr>" : "") +
+  `<a href="#${c.id}" data-id="${c.id}"><span class="num">${i ? i + 1 : ""}</span><span>${SHORT[c.id]}</span></a>`).join("") +
+  `<hr><p>${M.from} – ${M.to}<br>Google Takeout, personal account<br><a href="https://github.com/suhxnitiwari/up-next">github.com/suhxnitiwari/up-next</a></p>`;
+$("#burger").onclick = () => innerWidth <= 900 ? document.body.classList.toggle("nav-open") : document.body.classList.toggle("mini");
+window.addEventListener("hashchange", route);
+
+/* theme toggle, remembered per viewer only */
+try { const t = localStorage.getItem("upnext-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+$("#theme").onclick = () => {
+  const cur = document.documentElement.dataset.theme, dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("upnext-theme", document.documentElement.dataset.theme); } catch (e) {}
+};
+
+/* search: keyword search over titles, plus questions answered from the data */
+const input = $("#q"), sug = $("#suggest");
+input.placeholder = innerWidth < 640 ? "Search or ask" : `Search ${fmt(D.all.length)} titles or ask a question`;
+let sel = -1;
+function suggestions() {
+  const v = input.value.trim().toLowerCase();
+  let items;
+  if (!v) items = ASK.slice(0, 7).map((a, k) => ({t: a.q, a: a.a, href: "#ask/" + k, ic: "ask"}));
+  else {
+    const qs = ASK.map((a, k) => ({a, k})).filter(({a}) => v.split(/\s+/).every(w => a.q.toLowerCase().includes(w))).slice(0, 3).map(({a, k}) => ({t: a.q, a: a.a, href: "#ask/" + k, ic: "ask"}));
+    const vids = D.all.filter(c => (c.t + " " + c.ch).toLowerCase().includes(v)).slice(0, 5).map(c => ({t: c.t, href: "#search?q=" + encodeURIComponent(input.value.trim()), ic: "video"}));
+    items = [...qs, ...vids, {t: `Search titles for “${input.value.trim()}”`, href: "#search?q=" + encodeURIComponent(input.value.trim()), ic: "search"}];
+  }
+  sug.innerHTML = (!v ? '<div class="hd">Questions answered from the data</div>' : "") +
+    items.map((it, i) => `<a href="${it.href}" class="${i === sel ? "on" : ""}">${icon(it.ic, 20)}<span style="min-width:0"><span class="t">${esc(it.t)}</span>${it.a ? `<span class="ans">${it.a}</span>` : ""}</span></a>`).join("");
+  sug.classList.add("open");
+}
+input.addEventListener("focus", () => { sel = -1; suggestions(); });
+input.addEventListener("input", () => { sel = -1; suggestions(); });
+input.addEventListener("keydown", e => {
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { const n = sug.querySelectorAll("a").length; sel = (sel + (e.key === "ArrowDown" ? 1 : -1) + n) % n; suggestions(); e.preventDefault(); }
+  else if (e.key === "Escape") { sug.classList.remove("open"); input.blur(); }
+});
+$("#search").addEventListener("submit", e => {
+  e.preventDefault();
+  const on = sug.querySelector("a.on"), v = input.value.trim();
+  location.hash = on ? on.getAttribute("href").slice(1) : v ? "search?q=" + encodeURIComponent(v) : "intro";
+  sug.classList.remove("open"); input.blur();
+});
+sug.addEventListener("click", () => { sug.classList.remove("open"); input.blur(); });
+document.addEventListener("pointerdown", e => { if (!e.target.closest(".search")) sug.classList.remove("open"); });
+
+/* one tooltip for every chart mark */
+const tip = $("#tip");
+document.addEventListener("pointermove", e => {
+  const el = e.target.closest("[data-tip]");
+  if (!el) { tip.classList.remove("on"); return; }
+  tip.innerHTML = el.dataset.tip;
+  const r = tip.getBoundingClientRect();
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+  if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+  tip.style.left = x + "px"; tip.style.top = y + "px"; tip.classList.add("on");
+});
+document.addEventListener("pointerleave", () => tip.classList.remove("on"));
+
+/* hovering the rabbit-hole thumbnail flips through session openers, like a video preview */
+let flip = null;
+document.addEventListener("pointerover", e => {
+  const stack = e.target.closest(".qi .stack");
+  if (!stack || flip) return;
+  const ids = D.holes.filter(h => h.gate >= 0).map(h => D.all[h.gate].id); let k = 1;
+  flip = setInterval(() => { stack.querySelectorAll("img").forEach((im, j) => im.src = thumb(ids[(k + j) % ids.length])); k++; }, 650);
+  stack.closest(".qi").addEventListener("pointerleave", () => { clearInterval(flip); flip = null; }, {once: true});
+});
+
+route();
+</script>
+</body>
+</html>
