@@ -7,7 +7,7 @@
 <meta name="description" content="Nine months of my YouTube watch history, parsed from Google Takeout into sessions, topics and watch time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#ffffff; --raised:#ffffff; --chip:#f2f2f2; --chip-hover:#e5e5e5; --line:#e5e5e5;
@@ -200,11 +200,66 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
 .tseg button{flex:1;height:14px;padding:5px 0;border:0;background:none;cursor:pointer;position:relative}
 .tseg button:before{content:"";display:block;height:3px;border-radius:2px;background:rgba(255,255,255,.3)}
 .tseg i{position:absolute;left:0;top:5px;height:3px;border-radius:2px;background:#fff;width:0}
-.tcode{position:absolute;right:16px;top:30px;z-index:4;font-size:12px;color:rgba(255,255,255,.75)}
-.tsound{position:absolute;right:12px;bottom:12px;z-index:4;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;cursor:pointer;display:grid;place-items:center}
+.tcode{position:absolute;right:16px;bottom:14px;top:auto;z-index:4;font-size:12px;color:rgba(255,255,255,.75)}
+.tsound{position:absolute;right:12px;bottom:36px;z-index:4;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;cursor:pointer;display:grid;place-items:center}
 .pp{border:0;background:none;color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
 @media (prefers-reduced-motion:reduce){.tbig,.tk,.tline span,.tflash.go{animation:none}}
 @media (max-width:760px){.stage.trailer{min-height:440px}.tcopy{bottom:9%}.tclip iframe{transform:translate(-50%,-50%) scale(2.4)}}
+
+/* editorial title sequence: wine, gold hairlines, an arch window, film grain */
+.ed{--ivory:#F6EDE4;--goldh:#C9A15A;--ink0:#160910}
+.trailer.ed{background:var(--ink0)}
+.ed .glow{position:absolute;inset:0;background:radial-gradient(55% 75% at 72% 48%,rgba(201,161,90,.22),transparent 62%),radial-gradient(70% 90% at 12% 85%,rgba(142,42,62,.55),transparent 70%),var(--ink0);transition:background 1s}
+.ed.flip .glow{background:radial-gradient(55% 75% at 28% 48%,rgba(201,161,90,.22),transparent 62%),radial-gradient(70% 90% at 88% 85%,rgba(142,42,62,.55),transparent 70%),var(--ink0)}
+.arch{position:absolute;left:64%;top:8%;width:27%;aspect-ratio:3/4;border-radius:999px 999px 16px 16px;overflow:hidden;z-index:1;background:#0c0508;
+  box-shadow:0 0 0 1px rgba(201,161,90,.95),0 0 0 7px var(--ink0),0 0 0 8px rgba(201,161,90,.5),0 40px 90px rgba(0,0,0,.65);transition:left 1s cubic-bezier(.7,0,.2,1)}
+.ed.flip .arch{left:6%}
+.fr{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .22s linear;transform:scale(1.36);filter:sepia(.22) saturate(1.08) contrast(1.06) brightness(.92)}
+.fr.on{opacity:1}
+.arch.push .fr{animation:pushf 3.4s linear both}
+@keyframes pushf{from{transform:scale(1.36)}to{transform:scale(1.48)}}
+.cold .fr{transform:scale(1.16)}
+.arch .tposter,.arch .tclip{position:absolute;inset:0}
+.arch .tposter{width:100%;height:100%;object-fit:cover;transform:none;filter:sepia(.22) saturate(1.08) contrast(1.06) brightness(.92)}
+.arch .tclip{opacity:0}
+.arch .tclip.on.ready{opacity:1}
+.arch .tclip{background:#0c0508}
+.arch .tclip iframe{position:absolute;top:50%;left:50%;height:100%;width:240%;border:0;transform:translate(-50%,-50%) scale(1.7)}
+.arch.push .tposter,.arch.push .tclip{animation:push 3.4s linear both}
+@keyframes push{from{transform:scale(1.02)}to{transform:scale(1.12)}}
+.arch iframe,.cold.ed iframe{filter:sepia(.22) saturate(1.08) contrast(1.06) brightness(.95)}
+.tint{position:absolute;inset:0;background:linear-gradient(180deg,rgba(201,161,90,.16),rgba(142,42,62,.3));mix-blend-mode:soft-light;pointer-events:none}
+.ed .grain{position:absolute;inset:-60%;z-index:2;pointer-events:none;opacity:.14;mix-blend-mode:overlay;animation:grain .9s steps(6) infinite;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-5%)}60%{transform:translate(-2%,4%)}80%{transform:translate(5%,2%)}100%{transform:translate(0,0)}}
+.ed .tflash{background:var(--ink0)}
+.ed .tflash.go{animation:veil .6s ease-out}
+@keyframes veil{from{opacity:.85}to{opacity:0}}
+.ed .tcopy{left:6%;right:auto;width:52%;top:55%;bottom:auto;transform:translateY(-50%);z-index:3}
+.ed.flip .tcopy{left:42%}
+.cold.ed .tcopy{width:62%}
+.ed .tk{display:flex;align-items:center;gap:14px;font-family:Roboto,sans-serif;font-size:clamp(10px,1vw,13px);letter-spacing:.34em;color:var(--goldh);font-weight:500}
+.ed .rule{display:inline-block;width:46px;height:1px;background:var(--goldh);transform-origin:left;animation:rule .8s cubic-bezier(.7,0,.2,1) both}
+@keyframes rule{from{transform:scaleX(0)}}
+.ed .tbig{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-weight:400;letter-spacing:-.025em;line-height:.88;color:var(--ivory);font-size:clamp(70px,10.2vw,172px);margin:12px 0 14px;text-shadow:0 10px 60px rgba(0,0,0,.45);animation:focus 1s cubic-bezier(.2,.7,.2,1) both}
+.ed .tbig.word{font-size:clamp(58px,8vw,138px)}
+.ed .tbig .suf,.ed .tbig .dim{color:var(--goldh)}
+.ed .tline{font-family:"Instrument Serif",Georgia,serif;font-size:clamp(20px,2.4vw,36px);line-height:1.12;color:rgba(246,237,228,.88);max-width:22ch;font-weight:400}
+.ed .tline span{animation:focus .7s cubic-bezier(.2,.7,.2,1) both}
+@keyframes focus{from{opacity:0;filter:blur(14px);transform:translateY(10px)}to{opacity:1;filter:none;transform:none}}
+.lb{position:absolute;left:0;right:0;height:13%;background:#000;z-index:5;transition:transform 1.2s cubic-bezier(.7,0,.2,1)}
+.lb.top{top:0}.lb.bot{bottom:0}
+.ed.opened .lb.top{transform:translateY(-101%)}.ed.opened .lb.bot{transform:translateY(101%)}
+.ed .tseg i{background:var(--goldh)}
+.cold.ed .tshade{background:linear-gradient(90deg,rgba(22,9,16,.92),rgba(22,9,16,.55) 50%,rgba(22,9,16,.15)),linear-gradient(0deg,rgba(22,9,16,.6),transparent 45%)}
+.cold.ed .cbar{background:var(--goldh)}
+@media (prefers-reduced-motion:reduce){.ed .grain,.arch.push .tposter,.arch.push .tclip,.ed .tbig,.ed .tline span,.ed .rule{animation:none}}
+@media (max-width:760px){
+  .arch{left:24%;top:7%;width:52%}.ed.flip .arch{left:24%}
+  .ed .tcopy,.ed.flip .tcopy{left:6%;width:88%;top:auto;bottom:7%;transform:none}
+  .stage.trailer.ed{min-height:560px}
+  .ed .tbig{font-size:84px}.ed .tbig.word{font-size:64px}
+}
 
 /* chapter cold opens + chart entrances */
 .cold{position:absolute;inset:0;z-index:6;background:#000;cursor:pointer;overflow:hidden;transition:opacity .45s ease,transform .45s ease}
@@ -460,14 +515,15 @@ const CH = [
     id: "intro", title: `${fmt(M.videos)} videos, parsed`, q: "What I watch on YouTube, when, and how fast I move on.",
     step: "parse → enrich → classify → analyze", badge: "intro", tint: "#8E2A3E",
     stage() {
-      return `<div class="stage has-wall trailer" style="padding:0">
-        <img class="tposter" id="tposter" alt="">
-        <div class="tclip" data-yt data-slot="0"></div><div class="tclip" data-yt data-slot="1"></div>
-        <div class="tshade"></div><div class="tflash" id="tflash"></div>
+      return `<div class="stage has-wall trailer ed" style="padding:0">
+        <div class="glow"></div>
+        <div class="arch" id="arch"><img class="fr" id="frA" alt=""><img class="fr" id="frB" alt=""><div class="tint"></div></div>
+        <div class="grain"></div><div class="tflash" id="tflash"></div>
         <div class="tcopy" id="tcopy"></div>
+        <div class="lb top"></div><div class="lb bot"></div>
         <div class="tseg">${TRAILER.map((_, k) => `<button data-k="${k}" aria-label="Beat ${k + 1}"><i></i></button>`).join("")}</div>
         <span class="tcode mono" id="tcode"></span>
-        <button class="tsound" id="tsound" aria-label="Unmute">${icon("muted", 18)}</button></div>`;
+        </div>`;
     },
     desc() {
       return `<div class="stats">${tile(fmt(M.unique), "different videos")}${tile(fmt(M.channels), "channels")}${tile(M.sessions, "sessions")}${tile("~" + M.hours + " h", "estimated watch time")}</div>
@@ -734,56 +790,75 @@ const ASK = [
   {q: "How accurate are the topics?", a: `The model agrees with the rules on <b>${pct(D.pipeline.agreement)}</b> of held-out titles.`, go: "built"},
 ];
 
-/* ---------- the cover: a trailer cut from real clips in my history ---------- */
-// Clips are videos from my own watch history whose owners allow embedding (checked with oEmbed).
-const CLIPS = {
-  mamma: ["iCVpJ8x1Tnc", 18], love: ["xwdamnfS6IM", 8], glam: ["UxQg3_Cmwhw", 75], brows: ["9K_CZizKdVs", 60],
-  zendaya: ["obL7ny6Ijj0", 12], ted: ["8KkKuTCFvzI", 95], leila: ["tmd_-27EOIY", 40],
+/* ---------- the cover: a title sequence step-printed from frames inside my videos ---------- */
+// Hover previews still play real video; these keys feed mountClip.
+const CLIPS = {};
+const clipSrc = ([id, start]) => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&loop=1&playlist=${id}&start=${start}&enablejsapi=1`;
+const ids = (list, n = 3) => list.slice(0, n).map(x => x.id || x.c.id);
+const ofTopic = t => D.all.filter(c => c.topic === t);
+const REEL = {
+  open: [ofTopic("Femininity & dating")[1], ofTopic("Makeup & hair")[1], ofTopic("Film & TV")[1]].filter(Boolean).map(c => c.id),
+  film: ids(ofTopic("Film & TV")),
+  growth: ids(ofTopic("Mindset & discipline")),
+  late: ids(topCards(p => p[2] <= 4 && D.all[p[0]].topic === "Makeup & hair", 3)),
+  makeup: ids(ofTopic("Makeup & hair").slice(3)),
+  fem: ids(ofTopic("Femininity & dating")),
+  talks: ids(ofTopic("Talks & ideas")),
+  later: ids(D.watch_later.filter(w => w.t)),
+  close: [ofTopic("Makeup & hair")[0], ofTopic("Femininity & dating")[0], ofTopic("Film & TV")[0]].filter(Boolean).map(c => c.id),
 };
 const TRAILER = [
-  {clip: "mamma", kick: `${M.from} – ${M.to}`, count: M.videos, line: "videos. Google kept one thing about each: the second it started."},
-  {clip: "love", kick: "so I rebuilt", word: "the rest.", line: "Sessions. Watch time. Skips. Topics."},
-  {clip: "glam", kick: "12 AM – 5 AM", count: Math.round(lateMakeup * 100), suffix: "%", line: "of what I watch after midnight is makeup."},
-  {clip: "brows", kick: "attention span", count: att("Makeup & hair").dwell, suffix: "s", line: "is all a makeup tutorial gets before I'm gone."},
-  {clip: "zendaya", kick: "but this one", word: mmss(att("Femininity & dating").dwell), line: "holds me. Videos about confidence and femininity."},
-  {clip: "ted", kick: "loyalty", count: Math.round(M.channels_once / M.channels * 100), suffix: "%", line: `of ${fmt(M.channels)} channels never got a second chance.`},
-  {clip: "leila", kick: "watch later", word: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "saved videos I actually came back to."},
-  {clip: "love", kick: `${CH.length} questions`, word: "Up next.", line: "Pick one from the queue →", ms: 3600},
+  {reel: "open", kick: "a film in nine chapters", word: "Up Next", line: "Nine months of my YouTube, parsed.", ms: 3200},
+  {reel: "film", kick: `${M.from} – ${M.to}`, count: M.videos, line: "videos. Google kept one thing about each: the second it started."},
+  {reel: "growth", kick: "so I rebuilt", word: "the rest.", line: "Sessions. Watch time. Skips. Topics."},
+  {reel: "late", kick: "12 AM – 5 AM", count: Math.round(lateMakeup * 100), suffix: "%", line: "of what I watch after midnight is makeup."},
+  {reel: "makeup", kick: "attention span", count: att("Makeup & hair").dwell, suffix: "s", line: "is all a makeup tutorial gets before I'm gone."},
+  {reel: "fem", kick: "but this one", word: mmss(att("Femininity & dating").dwell), line: "holds me. Videos about confidence and femininity."},
+  {reel: "talks", kick: "loyalty", count: Math.round(M.channels_once / M.channels * 100), suffix: "%", line: `of ${fmt(M.channels)} channels never got a second chance.`},
+  {reel: "later", kick: "watch later", word: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "saved videos I actually came back to."},
+  {reel: "close", kick: `${CH.length} chapters`, word: "Press play.", line: "Pick one from the queue →", ms: 3600},
 ];
-const BEAT_MS = 2400;
-const clipSrc = ([id, start]) => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&loop=1&playlist=${id}&start=${start}&enablejsapi=1`;
+const BEAT_MS = 2800, FRAME_MS = 300;
+// Step-printing: YouTube's three frames from inside each video (25/50/75% through), crossfaded like a film edit.
+const framesOf = vids => vids.flatMap(id => ["hq1", "hq2", "hq3"].map(f => `https://i.ytimg.com/vi/${id}/${f}.jpg`));
+function reel(a, b, vids, isPaused = () => false) {
+  clearInterval(a._reel);
+  const frames = framesOf(vids);
+  frames.forEach(src => { const im = new Image(); im.src = src; });
+  let i = 0, front = a, back = b;
+  front.src = frames[0]; front.classList.add("on"); back.classList.remove("on");
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || frames.length < 2) return;
+  a._reel = setInterval(() => {
+    if (!document.body.contains(a)) return clearInterval(a._reel);
+    if (isPaused()) return;
+    back.src = frames[++i % frames.length];
+    back.classList.add("on"); front.classList.remove("on");
+    [front, back] = [back, front];
+  }, FRAME_MS);
+}
 let trailer = null;
 function startTrailer() {
   if (trailer) cancelAnimationFrame(trailer.raf);
-  const root = document.querySelector(".trailer"), slots = [...root.querySelectorAll(".tclip")], segs = root.querySelectorAll(".tseg i");
+  const root = document.querySelector(".trailer"), segs = root.querySelectorAll(".tseg i");
+  const frA = $("#frA"), frB = $("#frB");
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const T = {k: 0, t0: performance.now(), elapsed: 0, paused: false, front: 0, loaded: [null, null], muted: true};
+  const T = {k: 0, t0: performance.now(), elapsed: 0, paused: false};
   const dur = k => TRAILER[k].ms || BEAT_MS;
-  const load = (slot, name) => {
-    if (T.loaded[slot] === name) return;
-    T.loaded[slot] = name;
-    mountClip(slots[slot], name);
-  };
-  const cmd = (slot, func, args = []) => { const f = slots[slot].querySelector("iframe"); if (f) f.contentWindow.postMessage(JSON.stringify({event: "command", func, args}), "*"); };
   const typeLine = text => text.split(" ").map((w, i) => `<span style="animation-delay:${180 + i * 55}ms">${w}</span>`).join(" ");
   const show = k => {
     T.k = (k + TRAILER.length) % TRAILER.length;
-    const b = TRAILER[T.k], name = b.clip;
-    if (T.loaded[T.front] !== name) {                       // hard cut to the other slot, preloaded if possible
-      const back = 1 - T.front;
-      load(back, name);
-      slots[back].classList.add("on"); slots[T.front].classList.remove("on");
-      T.front = back;
-    }
-    const nxt = TRAILER[(T.k + 1) % TRAILER.length].clip;
-    if (nxt !== name) setTimeout(() => load(1 - T.front, nxt), 300);   // preload the next clip out of sight
-    $("#tposter").src = `https://i.ytimg.com/vi/${CLIPS[name][0]}/hqdefault.jpg`;
-    $("#tcopy").innerHTML = `<div class="tk">${esc(b.kick)}</div><div class="tbig${b.word ? " word" : ""}" id="tbig">${b.word || "0" + (b.suffix || "")}</div><div class="tline">${typeLine(b.line)}</div>`;
+    const b = TRAILER[T.k];
+    reel(frA, frB, REEL[b.reel].length ? REEL[b.reel] : REEL.open, () => T.paused);
+    const nxt = REEL[TRAILER[(T.k + 1) % TRAILER.length].reel] || [];
+    framesOf(nxt).forEach(src => { const im = new Image(); im.src = src; });   // warm the next reel
+    $("#tcopy").innerHTML = `<div class="tk"><i class="rule"></i>${esc(b.kick)}</div><div class="tbig${b.word ? " word" : ""}" id="tbig">${b.word || "0" + (b.suffix ? `<span class="suf">${b.suffix}</span>` : "")}</div><div class="tline">${typeLine(b.line)}</div>`;
     const flash = $("#tflash"); flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
+    root.classList.toggle("flip", T.k % 2 === 1);
+    const arch = $("#arch"); arch.classList.remove("push"); void arch.offsetWidth; arch.classList.add("push");
     if (b.count !== undefined) {
       const t0 = performance.now(), el = $("#tbig");
       const step = now => { const p = still ? 1 : Math.min(1, (now - t0) / 650), v = Math.round(b.count * (1 - Math.pow(1 - p, 3)));
-        if (!document.body.contains(el)) return; el.textContent = fmt(v) + (b.suffix || ""); if (p < 1) requestAnimationFrame(step); };
+        if (!document.body.contains(el)) return; el.innerHTML = fmt(v) + (b.suffix ? `<span class="suf">${b.suffix}</span>` : ""); if (p < 1) requestAnimationFrame(step); };
       requestAnimationFrame(step);
     }
   };
@@ -799,17 +874,14 @@ function startTrailer() {
   root.querySelector(".tseg").onclick = e => { const btn = e.target.closest("button"); if (btn) { show(+btn.dataset.k); T.t0 = performance.now(); T.elapsed = 0; } };
   const pp = $("#pp");
   const setPP = () => { if (pp) { pp.innerHTML = icon(T.paused ? "play" : "pause", 22); pp.setAttribute("aria-label", T.paused ? "Play" : "Pause"); } root.classList.toggle("paused", T.paused); };
-  if (pp) pp.onclick = () => { T.paused = !T.paused; T.t0 = performance.now() - T.elapsed; cmd(T.front, T.paused ? "pauseVideo" : "playVideo"); setPP(); };
-  $("#tsound").onclick = () => { T.muted = !T.muted; cmd(T.front, T.muted ? "mute" : "unMute"); $("#tsound").innerHTML = icon(T.muted ? "muted" : "sound", 18); $("#tsound").setAttribute("aria-label", T.muted ? "Unmute" : "Mute"); };
-  slots[0].classList.add("on");
+  if (pp) pp.onclick = () => { T.paused = !T.paused; T.t0 = performance.now() - T.elapsed; setPP(); };
   show(0); setPP();
+  setTimeout(() => root.classList.add("opened"), 500);
   T.raf = requestAnimationFrame(tick);
   trailer = T;
 }
 
 /* ---------- shared clip mounting: a clip only shows once YouTube says it is playing ---------- */
-CLIPS.rollers = ["g6Y0lPwEv2A", 30];
-CLIPS.invest = ["86rPBAnRCHc", 40];
 function mountClip(el, name) {
   el.classList.remove("ready");
   el.innerHTML = `<iframe src="${clipSrc(CLIPS[name])}" title="" tabindex="-1" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
@@ -820,6 +892,10 @@ window.addEventListener("message", e => {
   if (!String(e.origin).includes("youtube")) return;
   let d; try { d = JSON.parse(e.data); } catch (err) { return; }
   const state = d.event === "onStateChange" ? d.info : d.info && d.info.playerState;
+  if (state === 2 || state === 0) {   // paused or ended: never show YouTube's paused chrome
+    document.querySelectorAll("[data-yt]").forEach(sl => { const f = sl.querySelector("iframe"); if (f && f.contentWindow === e.source) sl.classList.remove("ready"); });
+    return;
+  }
   if (state !== 1) return;
   // wait out YouTube's start-of-playback controls before revealing the clip
   document.querySelectorAll("[data-yt]").forEach(sl => { const f = sl.querySelector("iframe");
@@ -834,27 +910,31 @@ function countUp(el, value, suffix = "", ms = 650) {
 
 /* ---------- chapter cold opens: a real clip and the chapter's headline before the chart ---------- */
 const COLD = {
-  hours: {clip: "glam", kick: "after midnight", count: Math.round(lateMakeup * 100), suffix: "%", line: "is makeup. Here's every hour of my week."},
-  seasons: {clip: "mamma", kick: `${D.months.labels[0]} → ${D.months.labels[D.months.labels.length - 1]}`, word: "4 obsessions.", line: "Makeup, then self-help, then femininity, then TED."},
-  attention: {clip: "brows", kick: "attention", word: `${att("Makeup & hair").dwell}s <span class="dim">vs</span> ${mmss(att("Femininity & dating").dwell)}`, line: "What I skim, and what I actually sit through."},
-  holes: {clip: "rollers", kick: "one more", count: Math.round(st[MAKEUP] * 100), suffix: "%", line: "of the time, one makeup video leads to another."},
-  channels: {clip: "ted", kick: "channels", word: `${D.pareto.for50}<span class="dim">/${fmt(M.channels)}</span>`, line: "make up half of everything I watch."},
-  search: {clip: "zendaya", kick: "search", count: Math.round(searchPct * 100), suffix: "%", line: "of my searches end in a click within a minute."},
-  later: {clip: "invest", kick: "watch later", word: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "Good intentions, mostly unwatched."},
-  built: {clip: "love", kick: "under the hood", word: "1 line → 9 chapters.", line: "From Google's raw HTML to this page."},
+  hours: {reel: "late", kick: "after midnight", count: Math.round(lateMakeup * 100), suffix: "%", line: "is makeup. Here's every hour of my week."},
+  seasons: {reel: "open", kick: `${D.months.labels[0]} → ${D.months.labels[D.months.labels.length - 1]}`, word: "4 obsessions.", line: "Makeup, then self-help, then femininity, then TED."},
+  attention: {reel: "makeup", kick: "attention", word: `${att("Makeup & hair").dwell}s <span class="dim">vs</span> ${mmss(att("Femininity & dating").dwell)}`, line: "What I skim, and what I actually sit through."},
+  holes: {reel: "makeup", kick: "one more", count: Math.round(st[MAKEUP] * 100), suffix: "%", line: "of the time, one makeup video leads to another."},
+  channels: {reel: "talks", kick: "channels", word: `${D.pareto.for50}<span class="dim">/${fmt(M.channels)}</span>`, line: "make up half of everything I watch."},
+  search: {reel: "fem", kick: "search", count: Math.round(searchPct * 100), suffix: "%", line: "of my searches end in a click within a minute."},
+  later: {reel: "later", kick: "watch later", word: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "Good intentions, mostly unwatched."},
+  built: {reel: "close", kick: "under the hood", word: "1 line → 9 chapters.", line: "From Google's raw HTML to this page."},
 };
 const COLD_MS = 2900;
 function coldOpen(ch) {
   const c = COLD[ch.id], player = document.querySelector(".player");
   if (!c || !player) return animateIn();
   const el = document.createElement("div");
-  el.className = "cold";
-  el.innerHTML = `<img class="tposter" src="https://i.ytimg.com/vi/${CLIPS[c.clip][0]}/hqdefault.jpg" alt=""><div class="tclip on" data-yt></div><div class="tshade"></div><div class="tflash go"></div>
-    <div class="tcopy"><div class="tk">${esc(c.kick)}</div><div class="tbig${c.word ? " word" : ""}">${c.word || "0" + (c.suffix || "")}</div><div class="tline">${c.line.split(" ").map((w, i) => `<span style="animation-delay:${220 + i * 55}ms">${w}</span>`).join(" ")}</div></div>
+  el.className = "cold ed";
+  el.innerHTML = `<img class="fr" alt=""><img class="fr" alt=""><div class="tshade"></div><div class="grain"></div><div class="tflash go"></div>
+    <div class="tcopy"><div class="tk"><i class="rule"></i>${esc(c.kick)}</div><div class="tbig${c.word ? " word" : ""}">${c.word || "0"}</div><div class="tline">${c.line.split(" ").map((w, i) => `<span style="animation-delay:${220 + i * 55}ms">${w}</span>`).join(" ")}</div></div>
     <span class="cskip">Skip intro ›</span><i class="cbar"></i>`;
   player.appendChild(el);
-  mountClip(el.querySelector(".tclip"), c.clip);
-  if (c.count !== undefined) countUp(el.querySelector(".tbig"), c.count, c.suffix || "");
+  const fr = el.querySelectorAll(".fr");
+  reel(fr[0], fr[1], REEL[c.reel].length ? REEL[c.reel] : REEL.open);
+  if (c.count !== undefined) { const big = el.querySelector(".tbig"), t0 = performance.now();
+    const step = now => { if (!document.body.contains(big)) return; const p = Math.min(1, (now - t0) / 700);
+      big.innerHTML = fmt(Math.round(c.count * (1 - Math.pow(1 - p, 3)))) + (c.suffix ? `<span class="suf">${c.suffix}</span>` : ""); if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step); }
   let done = false;
   const close = () => { if (done) return; done = true; el.classList.add("out"); setTimeout(() => el.remove(), 450); animateIn(); };
   el.onclick = close;
