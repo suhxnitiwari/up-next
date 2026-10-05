@@ -261,6 +261,25 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
   .ed .tbig{font-size:84px}.ed .tbig.word{font-size:64px}
 }
 
+/* boot intro + central question */
+.ed .bokeh{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;mix-blend-mode:screen}
+.ed.boot .arch,.ed.question .arch{opacity:0;transform:scale(.55);pointer-events:none}
+.arch{transition:left 1s cubic-bezier(.7,0,.2,1),opacity .8s ease,transform 1s cubic-bezier(.2,.8,.2,1)}
+.ed.boot .tcopy,.ed.question .tcopy{left:0;right:0;width:auto;text-align:center;top:50%;transform:translateY(-50%)}
+.bootmark{display:flex;flex-direction:column;align-items:center;gap:18px}
+.bm{position:relative;width:104px;height:74px;border-radius:22px;background:#8E2A3E;display:grid;place-items:center;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(201,161,90,.8),0 20px 60px rgba(142,42,62,.55);animation:bmpop .9s cubic-bezier(.2,1.4,.3,1) both}
+.bm svg{margin-left:4px;animation:bmtri .6s .45s cubic-bezier(.2,.8,.2,1) both}
+.bm .shine{position:absolute;top:-20%;bottom:-20%;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,240,220,.65),transparent);transform:skewX(-18deg);animation:shine 1s .9s ease-out both}
+.bw{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:clamp(34px,4vw,56px);color:#F6EDE4;letter-spacing:-.01em;animation:focus .9s .7s both}
+@keyframes bmpop{0%{transform:scale(.2);opacity:0}60%{opacity:1}100%{transform:scale(1)}}
+@keyframes bmtri{from{transform:scale(0) rotate(-30deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes shine{from{left:-60%}to{left:130%}}
+.ed.question .tk{justify-content:center}
+.ed.question .tbig.word{font-size:clamp(44px,6.4vw,104px);max-width:14ch;margin:16px auto 0;line-height:.98}
+.ed.boot .lb,.ed.question .lb{}
+@media (max-width:760px){.ed.question .tbig.word{font-size:46px}.ed.boot .tcopy,.ed.question .tcopy{top:45%}}
+
 /* chapter cold opens + chart entrances */
 .cold{position:absolute;inset:0;z-index:6;background:#000;cursor:pointer;overflow:hidden;transition:opacity .45s ease,transform .45s ease}
 .cold.out{opacity:0;transform:scale(1.04);pointer-events:none}
@@ -516,7 +535,7 @@ const CH = [
     step: "parse → enrich → classify → analyze", badge: "intro", tint: "#8E2A3E",
     stage() {
       return `<div class="stage has-wall trailer ed" style="padding:0">
-        <div class="glow"></div>
+        <div class="glow"></div><canvas class="bokeh" id="bokeh"></canvas>
         <div class="arch" id="arch"><img class="fr" id="frA" alt=""><img class="fr" id="frB" alt=""><div class="tint"></div></div>
         <div class="grain"></div><div class="tflash" id="tflash"></div>
         <div class="tcopy" id="tcopy"></div>
@@ -796,19 +815,47 @@ const CLIPS = {};
 const clipSrc = ([id, start]) => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&loop=1&playlist=${id}&start=${start}&enablejsapi=1`;
 const ids = (list, n = 3) => list.slice(0, n).map(x => x.id || x.c.id);
 const ofTopic = t => D.all.filter(c => c.topic === t);
+// Every reel draws its own videos: nothing repeats across the trailer or the chapter openers.
+const AVOID = new Set(["UxQg3_Cmwhw", "X82zMaQYAwc", "3I482TBLEzc"]);   // over-used or sensitive; kept out of the reels
+const USED = new Set();
+const titleKey = x => ((x.t || (x.c && x.c.t) || "").toLowerCase().replace(/[^a-z ]/g, "").split(" ").filter(w => w.length > 2).slice(0, 2).join(" "));
+function pick(list, n = 4) {
+  const out = [], keys = new Set();
+  for (const x of list) {
+    const id = x.id || (x.c && x.c.id), key = titleKey(x);
+    if (!id || AVOID.has(id) || USED.has(id) || (key && keys.has(key))) continue;
+    USED.add(id); keys.add(key); out.push(id);
+    if (out.length === n) break;
+  }
+  return out;
+}
+const lateMk = topCards(p => p[2] <= 4 && D.all[p[0]].topic === "Makeup & hair", 40).map(x => x.c);
+const monthTop = (m, t) => topCards(p => p[3] === m && D.all[p[0]].topic === t, 10).map(x => x.c);
 const REEL = {
-  open: [ofTopic("Femininity & dating")[1], ofTopic("Makeup & hair")[1], ofTopic("Film & TV")[1]].filter(Boolean).map(c => c.id),
-  film: ids(ofTopic("Film & TV")),
-  growth: ids(ofTopic("Mindset & discipline")),
-  late: ids(topCards(p => p[2] <= 4 && D.all[p[0]].topic === "Makeup & hair", 3)),
-  makeup: ids(ofTopic("Makeup & hair").slice(3)),
-  fem: ids(ofTopic("Femininity & dating")),
-  talks: ids(ofTopic("Talks & ideas")),
-  later: ids(D.watch_later.filter(w => w.t)),
-  close: [ofTopic("Makeup & hair")[0], ofTopic("Femininity & dating")[0], ofTopic("Film & TV")[0]].filter(Boolean).map(c => c.id),
+  open: pick([ofTopic("Femininity & dating")[1], ofTopic("Film & TV")[1], ofTopic("Makeup & hair")[2], ofTopic("Femininity & dating")[3]].filter(Boolean)),
+  film: pick(ofTopic("Film & TV")),
+  growth: pick(ofTopic("Mindset & discipline")),
+  late: pick(lateMk),
+  makeup: pick(ofTopic("Makeup & hair")),
+  fem: pick(ofTopic("Femininity & dating")),
+  talks: pick(ofTopic("Talks & ideas")),
+  later: pick(D.watch_later.filter(w => w.t)),
+  close: pick([...ofTopic("Femininity & dating"), ...ofTopic("Film & TV")].sort((a, b) => b.n - a.n)),
 };
+// chapter openers get their own, deeper picks
+Object.assign(REEL, {
+  c_hours: pick(lateMk),
+  c_seasons: [[0, "Makeup & hair"], [3, "Mindset & discipline"], [5, "Femininity & dating"], [8, "Talks & ideas"]].flatMap(([m, t]) => pick(monthTop(m, t), 1)),
+  c_attention: pick(ofTopic("Femininity & dating")),
+  c_holes: pick(ofTopic("Makeup & hair")),
+  c_channels: pick([...ofTopic("Mindset & discipline"), ...ofTopic("Talks & ideas")]),
+  c_search: pick(D.search_led.map(i => D.all[i])),
+  c_later: D.watch_later.filter(w => w.t).map(w => w.id),   // only a few saved videos exist, so this one may repeat
+  c_built: pick([...ofTopic("Calm & wellbeing"), ...ofTopic("Food"), ...ofTopic("Art & making")]),
+});
 const TRAILER = [
-  {reel: "open", kick: "a film in nine chapters", word: "Up Next", line: "Nine months of my YouTube, parsed.", ms: 3200},
+  {mode: "boot", reel: "open", ms: 2300},
+  {mode: "question", reel: "open", kick: `nine months · ${fmt(M.videos)} videos · one question`, word: "What does my YouTube know about me?", ms: 3400},
   {reel: "film", kick: `${M.from} – ${M.to}`, count: M.videos, line: "videos. Google kept one thing about each: the second it started."},
   {reel: "growth", kick: "so I rebuilt", word: "the rest.", line: "Sessions. Watch time. Skips. Topics."},
   {reel: "late", kick: "12 AM – 5 AM", count: Math.round(lateMakeup * 100), suffix: "%", line: "of what I watch after midnight is makeup."},
@@ -816,7 +863,7 @@ const TRAILER = [
   {reel: "fem", kick: "but this one", word: mmss(att("Femininity & dating").dwell), line: "holds me. Videos about confidence and femininity."},
   {reel: "talks", kick: "loyalty", count: Math.round(M.channels_once / M.channels * 100), suffix: "%", line: `of ${fmt(M.channels)} channels never got a second chance.`},
   {reel: "later", kick: "watch later", word: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "saved videos I actually came back to."},
-  {reel: "close", kick: `${CH.length} chapters`, word: "Press play.", line: "Pick one from the queue →", ms: 3600},
+  {reel: "close", kick: "the answer", word: "More than I'd admit.", line: `${CH.length} chapters. Press play on any of them →`, ms: 3800},
 ];
 const BEAT_MS = 2800, FRAME_MS = 300;
 // Step-printing: YouTube's three frames from inside each video (25/50/75% through), crossfaded like a film edit.
@@ -836,6 +883,31 @@ function reel(a, b, vids, isPaused = () => false) {
     [front, back] = [back, front];
   }, FRAME_MS);
 }
+// Candlelight: soft gold and rose lights drifting up through the frame, drawn live on a canvas.
+function candle(cv, isPaused) {
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const ctx = cv.getContext("2d"), dpr = Math.min(2, devicePixelRatio || 1);
+  const size = () => { cv.width = cv.clientWidth * dpr; cv.height = cv.clientHeight * dpr; };
+  size(); addEventListener("resize", size);
+  const hues = ["232,176,74", "201,161,90", "208,96,122", "246,214,170"];
+  const P = Array.from({length: 34}, () => ({x: Math.random(), y: Math.random(), r: 8 + Math.random() * 46, v: .00025 + Math.random() * .0007,
+    a: .05 + Math.random() * .16, c: hues[Math.floor(Math.random() * hues.length)], ph: Math.random() * 6.28}));
+  const draw = t => {
+    if (!document.body.contains(cv)) return;
+    const w = cv.width, h = cv.height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.globalCompositeOperation = "lighter";
+    for (const p of P) {
+      if (!still && !isPaused()) { p.y -= p.v; p.x += Math.sin(t / 2400 + p.ph) * .00018; if (p.y < -.1) { p.y = 1.1; p.x = Math.random(); } }
+      const flick = .75 + .25 * Math.sin(t / 380 + p.ph * 3), R = p.r * dpr;
+      const g = ctx.createRadialGradient(p.x * w, p.y * h, 0, p.x * w, p.y * h, R);
+      g.addColorStop(0, `rgba(${p.c},${p.a * flick})`); g.addColorStop(1, `rgba(${p.c},0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x * w, p.y * h, R, 0, 6.29); ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  };
+  requestAnimationFrame(draw);
+}
 let trailer = null;
 function startTrailer() {
   if (trailer) cancelAnimationFrame(trailer.raf);
@@ -851,9 +923,16 @@ function startTrailer() {
     reel(frA, frB, REEL[b.reel].length ? REEL[b.reel] : REEL.open, () => T.paused);
     const nxt = REEL[TRAILER[(T.k + 1) % TRAILER.length].reel] || [];
     framesOf(nxt).forEach(src => { const im = new Image(); im.src = src; });   // warm the next reel
-    $("#tcopy").innerHTML = `<div class="tk"><i class="rule"></i>${esc(b.kick)}</div><div class="tbig${b.word ? " word" : ""}" id="tbig">${b.word || "0" + (b.suffix ? `<span class="suf">${b.suffix}</span>` : "")}</div><div class="tline">${typeLine(b.line)}</div>`;
+    root.classList.toggle("boot", b.mode === "boot");
+    root.classList.toggle("question", b.mode === "question");
+    if (b.mode === "boot") {
+      $("#tcopy").innerHTML = `<div class="bootmark"><span class="bm"><svg viewBox="0 0 24 24" width="42" height="42"><path d="M8 5.5v13l10.5-6.5z" fill="#F6EDE4"/></svg><i class="shine"></i></span><span class="bw">Up Next</span></div>`;
+      const flash0 = $("#tflash"); flash0.classList.remove("go");
+      return;
+    }
+    $("#tcopy").innerHTML = `<div class="tk"><i class="rule"></i>${esc(b.kick)}</div><div class="tbig${b.word ? " word" : ""}" id="tbig">${b.word || "0" + (b.suffix ? `<span class="suf">${b.suffix}</span>` : "")}</div>${b.line ? `<div class="tline">${typeLine(b.line)}</div>` : ""}`;
     const flash = $("#tflash"); flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
-    root.classList.toggle("flip", T.k % 2 === 1);
+    root.classList.toggle("flip", T.k % 2 === 0 && T.k > 1);
     const arch = $("#arch"); arch.classList.remove("push"); void arch.offsetWidth; arch.classList.add("push");
     if (b.count !== undefined) {
       const t0 = performance.now(), el = $("#tbig");
@@ -875,6 +954,7 @@ function startTrailer() {
   const pp = $("#pp");
   const setPP = () => { if (pp) { pp.innerHTML = icon(T.paused ? "play" : "pause", 22); pp.setAttribute("aria-label", T.paused ? "Play" : "Pause"); } root.classList.toggle("paused", T.paused); };
   if (pp) pp.onclick = () => { T.paused = !T.paused; T.t0 = performance.now() - T.elapsed; setPP(); };
+  candle($("#bokeh"), () => T.paused);
   show(0); setPP();
   setTimeout(() => root.classList.add("opened"), 500);
   T.raf = requestAnimationFrame(tick);
@@ -910,14 +990,14 @@ function countUp(el, value, suffix = "", ms = 650) {
 
 /* ---------- chapter cold opens: a real clip and the chapter's headline before the chart ---------- */
 const COLD = {
-  hours: {reel: "late", kick: "after midnight", count: Math.round(lateMakeup * 100), suffix: "%", line: "is makeup. Here's every hour of my week."},
-  seasons: {reel: "open", kick: `${D.months.labels[0]} → ${D.months.labels[D.months.labels.length - 1]}`, word: "4 obsessions.", line: "Makeup, then self-help, then femininity, then TED."},
-  attention: {reel: "makeup", kick: "attention", word: `${att("Makeup & hair").dwell}s <span class="dim">vs</span> ${mmss(att("Femininity & dating").dwell)}`, line: "What I skim, and what I actually sit through."},
-  holes: {reel: "makeup", kick: "one more", count: Math.round(st[MAKEUP] * 100), suffix: "%", line: "of the time, one makeup video leads to another."},
-  channels: {reel: "talks", kick: "channels", word: `${D.pareto.for50}<span class="dim">/${fmt(M.channels)}</span>`, line: "make up half of everything I watch."},
-  search: {reel: "fem", kick: "search", count: Math.round(searchPct * 100), suffix: "%", line: "of my searches end in a click within a minute."},
-  later: {reel: "later", kick: "watch later", word: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "Good intentions, mostly unwatched."},
-  built: {reel: "close", kick: "under the hood", word: "1 line → 9 chapters.", line: "From Google's raw HTML to this page."},
+  hours: {reel: "c_hours", kick: "after midnight", count: Math.round(lateMakeup * 100), suffix: "%", line: "is makeup. Here's every hour of my week."},
+  seasons: {reel: "c_seasons", kick: `${D.months.labels[0]} → ${D.months.labels[D.months.labels.length - 1]}`, word: "4 obsessions.", line: "Makeup, then self-help, then femininity, then TED."},
+  attention: {reel: "c_attention", kick: "attention", word: `${att("Makeup & hair").dwell}s <span class="dim">vs</span> ${mmss(att("Femininity & dating").dwell)}`, line: "What I skim, and what I actually sit through."},
+  holes: {reel: "c_holes", kick: "one more", count: Math.round(st[MAKEUP] * 100), suffix: "%", line: "of the time, one makeup video leads to another."},
+  channels: {reel: "c_channels", kick: "channels", word: `${D.pareto.for50}<span class="dim">/${fmt(M.channels)}</span>`, line: "make up half of everything I watch."},
+  search: {reel: "c_search", kick: "search", count: Math.round(searchPct * 100), suffix: "%", line: "of my searches end in a click within a minute."},
+  later: {reel: "c_later", kick: "watch later", word: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "Good intentions, mostly unwatched."},
+  built: {reel: "c_built", kick: "under the hood", word: "1 line → 9 chapters.", line: "From Google's raw HTML to this page."},
 };
 const COLD_MS = 2900;
 function coldOpen(ch) {
@@ -930,7 +1010,7 @@ function coldOpen(ch) {
     <span class="cskip">Skip intro ›</span><i class="cbar"></i>`;
   player.appendChild(el);
   const fr = el.querySelectorAll(".fr");
-  reel(fr[0], fr[1], REEL[c.reel].length ? REEL[c.reel] : REEL.open);
+  reel(fr[0], fr[1], REEL[c.reel].length ? REEL[c.reel] : REEL.c_built);
   if (c.count !== undefined) { const big = el.querySelector(".tbig"), t0 = performance.now();
     const step = now => { if (!document.body.contains(big)) return; const p = Math.min(1, (now - t0) / 700);
       big.innerHTML = fmt(Math.round(c.count * (1 - Math.pow(1 - p, 3)))) + (c.suffix ? `<span class="suf">${c.suffix}</span>` : ""); if (p < 1) requestAnimationFrame(step); };
