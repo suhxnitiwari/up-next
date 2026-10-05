@@ -51,11 +51,11 @@ def excluded(df, ignore_topic=False):
 # Four topic groups for charts that need categorical color (validated palette, 4 hues + gray).
 GROUPS = {"Makeup & hair": ["Makeup & hair"],
           "Self-growth": ["Mindset & discipline", "Femininity & dating", "Calm & wellbeing", "Talks & ideas"],
-          "Film & TV": ["Film & TV"], "Food & hobbies": ["Food", "Sports", "Art & making"]}
+          "Film & TV": ["Film & TV"], "Food & hobbies": ["Food", "Art & making"]}
 GROUP_NAMES = list(GROUPS) + ["Other"]
 TOPIC_GROUP = {t: i for i, g in enumerate(GROUPS.values()) for t in g}
 TOPIC_ORDER = ["Makeup & hair", "Mindset & discipline",
-               "Film & TV", "Femininity & dating", "Calm & wellbeing", "Talks & ideas", "Food", "Sports", "Art & making"]
+               "Film & TV", "Femininity & dating", "Calm & wellbeing", "Talks & ideas", "Food", "Art & making"]
 
 
 def tidy(title):

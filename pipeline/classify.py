@@ -28,7 +28,8 @@ TOPICS = {
                         r"huberman|stress|screen addiction|healing|dopamine|cortisol|stretch\w*|yoga",
     "Talks & ideas": r"\bted\b|tedx|ted talk|ab ?talks|commencement|lecture|keynote",
     "Film & TV": r"trailer|movie|film|review|netflix|prime video|movieclips|bridgerton|animated summary|\bscene\b|episode|season \d|"
-                 r"rotten tomatoes|youtube movies|msmojo|\bedit\b|edits",
+                 r"rotten tomatoes|youtube movies|msmojo|\bedit\b|edits|euphoria|gossip girl|summer i turned|love island|\bclip\b|"
+                 r"freeform|shondaland|\bhbo\b|disney channel|\bcast\b|actor|actress",
     "Food": r"recipe|kitchen|bread|\bcook\w*|bake\w*|baking|ranveer brar|chef|dessert",
     "Sports": r"\bnfl\b|cricinfo|cricket|table tennis|pechpong|\bwtt\b|topspin|super bowl|\bipl\b",
     "Art & making": r"painting|acrylic|drawing|sketch|watercolor|crochet|\bdiy\b|artwork",

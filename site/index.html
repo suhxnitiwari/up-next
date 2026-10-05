@@ -177,6 +177,34 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
 .panel .lede{color:var(--ink-2);margin:0 0 10px;font-size:13px}
 .panel p{margin:0 0 8px}
 
+/* trailer cover */
+.trailer{overflow:hidden;background:#000}
+.tf{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
+.tf.on{opacity:1}
+.tf img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.32);filter:saturate(1.1) contrast(1.05)}
+.tf.on img{animation:kb 3.4s linear forwards}
+.trailer.paused .tf.on img{animation-play-state:paused}
+@keyframes kb{from{transform:scale(1.32) translateX(0)}to{transform:scale(1.46) translateX(-2%)}}
+.tf:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,4,6,.92) 0%,rgba(8,4,6,.72) 38%,rgba(8,4,6,.15) 75%),linear-gradient(0deg,rgba(0,0,0,.75),transparent 45%)}
+.tcopy{position:absolute;left:6%;right:6%;bottom:14%;z-index:2;color:#fff}
+.tk{font-size:clamp(11px,1.1vw,14px);letter-spacing:.22em;text-transform:uppercase;color:#E8B04A;font-weight:500}
+.tbig{font-size:clamp(64px,10.5vw,176px);line-height:.88;font-weight:700;letter-spacing:-.05em;margin:10px 0 14px;text-shadow:0 6px 40px rgba(0,0,0,.5)}
+.tbig .dim{color:rgba(255,255,255,.45)}
+.tline{font-size:clamp(16px,1.9vw,28px);line-height:1.25;font-weight:500;max-width:30ch;color:#f3e9eb}
+.tf.on .tbig{animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+.tf.on .tline{animation:rise .7s .12s cubic-bezier(.2,.8,.2,1) both}
+.tf.on .tk{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.tseg{position:absolute;left:12px;right:12px;top:12px;z-index:3;display:flex;gap:4px}
+.tseg button{flex:1;height:14px;padding:5px 0;border:0;background:none;cursor:pointer}
+.tseg button:before{content:"";display:block;height:3px;border-radius:2px;background:rgba(255,255,255,.3);position:relative}
+.tseg button{position:relative}
+.tseg i{position:absolute;left:0;top:5px;height:3px;border-radius:2px;background:#fff;width:0}
+.tcode{position:absolute;right:16px;top:30px;z-index:3;font-size:12px;color:rgba(255,255,255,.75)}
+.pp{border:0;background:none;color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
+@media (prefers-reduced-motion:reduce){.tf.on img,.tf.on .tbig,.tf.on .tline,.tf.on .tk{animation:none}}
+@media (max-width:760px){.stage.trailer{min-height:420px}.tcopy{bottom:10%}}
+
 /* charts */
 .heat{display:grid;gap:2px;align-items:center;height:100%;align-content:stretch}
 .heat .cell{border-radius:2px;min-width:0;height:100%;min-height:10px}
@@ -319,6 +347,7 @@ const att = t => D.attention.find(a => a.topic === t);
 
 const ICON = {
   play:'<path d="M8 5v14l11-7z"/>',
+  pause:'<path d="M7 5h3.5v14H7zm6.5 0H17v14h-3.5z"/>',
   prev:'<path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>',
   next:'<path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/>',
   search:'<circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15 16.4l1.4-1.4 5 5-1.4 1.4z"/>',
@@ -370,10 +399,12 @@ const CH = [
     id: "intro", title: `${fmt(M.videos)} videos, parsed`, q: "What I watch on YouTube, when, and how fast I move on.",
     step: "parse → enrich → classify → analyze", badge: "intro", tint: "#8E2A3E",
     stage() {
-      return `<div class="stage has-wall" style="padding:0">
-        <div class="wall">${D.all.slice(0, 36).map(c => `<img src="${thumb(c.id)}" alt="">`).join("")}</div><div class="shade"></div>
-        <div class="intro"><div class="kicker">${M.from} – ${M.to}</div><h1>${fmt(M.videos)} videos, parsed.</h1>
-        <div class="sub">Google Takeout only records when each video started. A four-step Python pipeline turns that into sessions, watch time, skips and topics. Each chapter in the queue plays one question.</div></div></div>`;
+      return `<div class="stage has-wall trailer" style="padding:0">
+        ${TRAILER.map((f, k) => `<div class="tf${k === 0 ? " on" : ""}" data-k="${k}">
+          <img src="https://i.ytimg.com/vi/${f.img}/hqdefault.jpg" alt="">
+          <div class="tcopy"><div class="tk">${esc(f.kick)}</div><div class="tbig">${f.big}</div><div class="tline">${f.line}</div></div></div>`).join("")}
+        <div class="tseg">${TRAILER.map((_, k) => `<button data-k="${k}" aria-label="Frame ${k + 1}"><i></i></button>`).join("")}</div>
+        <span class="tcode mono" id="tcode"></span></div>`;
     },
     desc() {
       return `<div class="stats">${tile(fmt(M.unique), "different videos")}${tile(fmt(M.channels), "channels")}${tile(M.sessions, "sessions")}${tile("~" + M.hours + " h", "estimated watch time")}</div>
@@ -383,8 +414,9 @@ const CH = [
     method: () => `<h4>The data problem</h4>Takeout's watch history is one 2 MB line of HTML: a verb, a video link, a channel link and a timestamp per entry. No durations, no pauses, no completion. Every behavioral number on this site is inferred from the gaps between timestamps. The full pipeline is chapter ${CH.length}.<h4>What's left out</h4>${fmt(M.excluded)} of ${fmt(M.all_plays)} plays are left out by choice, from every chart and total. Search timing and watch-time gaps were measured on the full history first, so the remaining numbers aren't distorted by the removal.`,
     lower(f) {
       const topics = ["All", ...D.topics.filter(x => D.all.some(c => c.topic === x))], t = f || "All";
-      const list = D.all.filter(c => c.n >= 2 && (t === "All" || c.topic === t)).slice(0, 36);
-      return `<h2>Played again and again</h2><p class="lede">${fmt(M.rewatched_videos)} videos got more than one play. ${pct(M.repeat_share)} of all plays were repeats, led by self-help videos.</p>
+      const all = t === "All", list = all ? D.all.filter(c => c.n >= 2).slice(0, 36) : D.all.filter(c => c.topic === t).slice(0, 60);
+      const count = all ? 0 : D.all.filter(c => c.topic === t).length;
+      return `<h2>${all ? "Played again and again" : esc(t)}</h2><p class="lede">${all ? `${fmt(M.rewatched_videos)} videos got more than one play. ${pct(M.repeat_share)} of all plays were repeats, led by self-help videos.` : `${fmt(count)} videos${count > 60 ? ", the 60 most played shown" : ""}, most played first.`}</p>
         <div class="chips">${topics.map(x => `<a class="chip ${x === t ? "on" : ""}" href="#intro/${encodeURIComponent(x)}">${esc(x)}</a>`).join("")}</div>
         ${grid(list.map(c => card(c, plays(c.n))))}`;
     },
@@ -427,7 +459,7 @@ const CH = [
       return `<p><b>January:</b> makeup (${pct(D.months.share[D.topics.indexOf("Makeup & hair")][0])}) and romance-movie clips (${pct(D.months.share[D.topics.indexOf("Film & TV")][0])}). <b>April:</b> mindset, ${pct(sh("Mindset & discipline", 3))}. <b>May:</b> mindset and calm together, ${pct(sh("Mindset & discipline", 4) + sh("Calm & wellbeing", 4))}. <b>June:</b> femininity peaks at ${pct(sh("Femininity & dating", 5))}. <b>July:</b> mindset again, ${pct(sh("Mindset & discipline", 6))}. <b>August:</b> makeup again, ${pct(sh("Makeup & hair", 7))}. <b>September:</b> TED talks, ${pct(sh("Talks & ideas", 8))}, the week I saved a TED playlist. October only has ${D.months.total[9]} videos, so read it lightly.</p>
         <div class="panel"><h3>Every topic, month by month</h3><p class="lede">Share of that month's videos. All panels share one scale; the dark bar is each topic's peak.</p>${multiples()}</div>`;
     },
-    method: () => `Share = a group's plays ÷ that month's plays that have a topic (untagged, deleted and blocked videos are left out). All plays per month: ${D.months.labels.map((l, i) => `${l} ${D.months.total[i]}`).join(", ")}. January starts on the 16th and October ends on the 2nd. Groups: Self-growth = mindset, femininity, calm, talks; Food & hobbies = food, sports, art.`,
+    method: () => `Share = a group's plays ÷ that month's plays that have a topic (untagged, deleted and blocked videos are left out). All plays per month: ${D.months.labels.map((l, i) => `${l} ${D.months.total[i]}`).join(", ")}. January starts on the 16th and October ends on the 2nd. Groups: Self-growth = mindset, femininity, calm, talks; Food & hobbies = food and art.`,
     lower(f) {
       const m = +f, L = D.months.labels;
       return `<h2>Most played in ${L[m]}</h2><p class="lede">${D.months.total[m]} plays that month.</p>
@@ -639,6 +671,45 @@ const ASK = [
   {q: "How accurate are the topics?", a: `The model agrees with the rules on <b>${pct(D.pipeline.agreement)}</b> of held-out titles.`, go: "built"},
 ];
 
+/* ---------- the cover: an auto-playing trailer built from the data ---------- */
+const topIn = (pred) => { const t = topCards(pred, 1)[0]; return t ? t.c.id : D.all[0].id; };
+const byTopic = t => (D.all.find(c => c.topic === t) || D.all[0]).id;
+const TRAILER = [
+  {img: D.all[0].id, kick: `${M.from} – ${M.to}`, big: fmt(M.videos), line: "videos. Google kept only the second each one started.<br>I rebuilt everything else."},
+  {img: topIn(p => p[2] <= 4 && D.all[p[0]].topic === "Makeup & hair"), kick: "12 AM – 5 AM", big: pct(lateMakeup), line: "of what I watch after midnight<br>is makeup."},
+  {img: byTopic("Makeup & hair"), kick: "Attention", big: `${att("Makeup & hair").dwell}s`, line: "That's all a makeup video gets<br>before I'm gone."},
+  {img: byTopic("Femininity & dating"), kick: "Attention", big: mmss(att("Femininity & dating").dwell), line: "That's how long a video about confidence<br>and femininity keeps me."},
+  {img: byTopic("Talks & ideas"), kick: "September", big: pct(sh("Talks & ideas", 8)), line: "of the month was TED talks."},
+  {img: D.all[3].id, kick: "Channels", big: pct(M.channels_once / M.channels), line: `of ${fmt(M.channels)} channels<br>never got a second video.`},
+  {img: (D.watch_later[0] || D.all[0]).id, kick: "Watch later", big: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "saved videos I actually played."},
+  {img: D.all[1].id, kick: `${CH.length} chapters`, big: "Up next", line: "Pick a question from the queue →"},
+];
+const FRAME_MS = 3200;
+let trailer = null;
+function startTrailer() {
+  if (trailer) cancelAnimationFrame(trailer.raf);
+  const root = document.querySelector(".trailer"), frames = root.querySelectorAll(".tf"), segs = root.querySelectorAll(".tseg i");
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const T = {k: 0, t0: performance.now(), paused: still, elapsed: 0};
+  const show = k => { T.k = (k + TRAILER.length) % TRAILER.length; frames.forEach((f, i) => f.classList.toggle("on", i === T.k)); };
+  const tick = now => {
+    if (!document.body.contains(root)) return;
+    if (!T.paused) T.elapsed = now - T.t0;
+    if (T.elapsed >= FRAME_MS) { show(T.k + 1); T.t0 = now; T.elapsed = 0; }
+    segs.forEach((s, i) => s.style.width = (i < T.k ? 100 : i === T.k ? T.elapsed / FRAME_MS * 100 : 0) + "%");
+    const sec = Math.floor((T.k * FRAME_MS + T.elapsed) / 1000), tot = Math.round(TRAILER.length * FRAME_MS / 1000);
+    $("#tcode").textContent = `0:${String(sec).padStart(2, "0")} / 0:${String(tot).padStart(2, "0")}`;
+    T.raf = requestAnimationFrame(tick);
+  };
+  root.querySelector(".tseg").onclick = e => { const b = e.target.closest("button"); if (b) { show(+b.dataset.k); T.t0 = performance.now(); T.elapsed = 0; } };
+  const pp = $("#pp");
+  const setPP = () => { if (pp) { pp.innerHTML = icon(T.paused ? "play" : "pause", 22); pp.setAttribute("aria-label", T.paused ? "Play" : "Pause"); } root.classList.toggle("paused", T.paused); };
+  if (pp) pp.onclick = () => { T.paused = !T.paused; T.t0 = performance.now() - T.elapsed; setPP(); };
+  setPP();
+  T.raf = requestAnimationFrame(tick);
+  trailer = T;
+}
+
 /* ---------- view ---------- */
 function upNextThumb(id) {
   const W = 168, H = 94;
@@ -676,7 +747,7 @@ function render(chId, f, opts = {}) {
       <div class="stage-wrap"><div class="ambient" style="background:radial-gradient(60% 60% at 30% 50%, ${ch.tint}, transparent 70%),radial-gradient(50% 60% at 75% 50%, #A77A1C66, transparent 70%)"></div>
       <div class="player">${ch.stage(filt)}
         <div class="controls">${scrub(ch.id, opts.day)}
-          <div class="ctl"><a href="#${prev.id}" aria-label="Previous chapter">${icon("prev", 22)}</a><span>${icon("play", 22)}</span><a href="#${next.id}" aria-label="Next chapter">${icon("next", 22)}</a>
+          <div class="ctl"><a href="#${prev.id}" aria-label="Previous chapter">${icon("prev", 22)}</a>${ch.id === "intro" && opts.search === undefined && opts.day === undefined ? `<button class="pp" id="pp" aria-label="Pause">${icon("pause", 22)}</button>` : `<span>${icon("play", 22)}</span>`}<a href="#${next.id}" aria-label="Next chapter">${icon("next", 22)}</a>
           <span class="mono">${i + 1} / ${CH.length}</span><span class="chap">${esc(ch.title)}</span><span class="sp"></span><span class="opt mono">${M.from} – ${M.to}</span></div></div></div></div>
       <div class="vtitle">${esc(ch.title)}</div>
       <div class="owner"><span class="avatar">S</span><div class="who"><b>Up Next</b><span>${esc(ch.step)}</span></div><span style="flex:1"></span>
@@ -692,6 +763,7 @@ function render(chId, f, opts = {}) {
     <section class="lower">${lower}</section>`;
   document.querySelectorAll(".guide a[data-id]").forEach(x => x.classList.toggle("on", x.dataset.id === ch.id));
   $("#more").onclick = e => { const m = $("#method"); m.classList.toggle("open"); e.target.textContent = m.classList.contains("open") ? "Show less" : "Show more: how this was computed"; };
+  if (document.querySelector(".trailer")) startTrailer();
   $("#scrub").onclick = e => { const d = e.target.dataset.day; if (d !== undefined && D.daily.n[d]) location.hash = `${ch.id}/day/${d}`; };
 }
 
