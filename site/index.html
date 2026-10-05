@@ -261,6 +261,14 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
   .ed .tbig{font-size:84px}.ed .tbig.word{font-size:64px}
 }
 
+/* real films inside the arch, and a candle film behind the boot and question */
+.vc{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;filter:sepia(.18) saturate(1.05) contrast(1.06) brightness(.94)}
+.vc.on{opacity:1}
+.arch.push .vc{animation:pushv 3.4s linear both}
+@keyframes pushv{from{transform:scale(1.02)}to{transform:scale(1.1)}}
+.candlefilm{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity 1.2s ease;filter:sepia(.35) saturate(1.2) hue-rotate(-12deg) brightness(.7);mix-blend-mode:screen;pointer-events:none}
+.ed.boot .candlefilm,.ed.question .candlefilm{opacity:.55}
+
 /* boot intro + central question */
 .ed .bokeh{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;mix-blend-mode:screen}
 .ed.boot .arch,.ed.question .arch{opacity:0;transform:scale(.55);pointer-events:none}
@@ -536,7 +544,8 @@ const CH = [
     stage() {
       return `<div class="stage has-wall trailer ed" style="padding:0">
         <div class="glow"></div><canvas class="bokeh" id="bokeh"></canvas>
-        <div class="arch" id="arch"><img class="fr" id="frA" alt=""><img class="fr" id="frB" alt=""><div class="tint"></div></div>
+        <video class="candlefilm" id="vbg" src="clips/flames.mp4" muted playsinline loop autoplay preload="auto"></video>
+        <div class="arch" id="arch"><img class="fr" id="frA" alt=""><img class="fr" id="frB" alt=""><video class="vc" id="vA" muted playsinline loop preload="none"></video><video class="vc" id="vB" muted playsinline loop preload="none"></video><div class="tint"></div></div>
         <div class="grain"></div><div class="tflash" id="tflash"></div>
         <div class="tcopy" id="tcopy"></div>
         <div class="lb top"></div><div class="lb bot"></div>
@@ -856,16 +865,18 @@ Object.assign(REEL, {
 const TRAILER = [
   {mode: "boot", reel: "open", ms: 2300},
   {mode: "question", reel: "open", kick: `nine months · ${fmt(M.videos)} videos · one question`, word: "What does my YouTube know about me?", ms: 3400},
-  {reel: "film", kick: `${M.from} – ${M.to}`, count: M.videos, line: "videos. Google kept one thing about each: the second it started."},
-  {reel: "growth", kick: "so I rebuilt", word: "the rest.", line: "Sessions. Watch time. Skips. Topics."},
-  {reel: "late", kick: "12 AM – 5 AM", count: Math.round(lateMakeup * 100), suffix: "%", line: "of what I watch after midnight is makeup."},
-  {reel: "makeup", kick: "attention span", count: att("Makeup & hair").dwell, suffix: "s", line: "is all a makeup tutorial gets before I'm gone."},
-  {reel: "fem", kick: "but this one", word: mmss(att("Femininity & dating").dwell), line: "holds me. Videos about confidence and femininity."},
-  {reel: "talks", kick: "loyalty", count: Math.round(M.channels_once / M.channels * 100), suffix: "%", line: `of ${fmt(M.channels)} channels never got a second chance.`},
-  {reel: "later", kick: "watch later", word: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "saved videos I actually came back to."},
-  {reel: "close", kick: "the answer", word: "More than I'd admit.", line: `${CH.length} chapters. Press play on any of them →`, ms: 3800},
+  {film: "mirror", reel: "film", kick: `${M.from} – ${M.to}`, count: M.videos, line: "videos. Google kept one thing about each: the second it started."},
+  {film: "chair", reel: "growth", kick: "so I rebuilt", word: "the rest.", line: "Sessions. Watch time. Skips. Topics."},
+  {film: "retro", reel: "late", kick: "12 AM – 5 AM", count: Math.round(lateMakeup * 100), suffix: "%", line: "of what I watch after midnight is makeup."},
+  {film: "lips", reel: "makeup", kick: "attention span", count: att("Makeup & hair").dwell, suffix: "s", line: "is all a makeup tutorial gets before I'm gone."},
+  {film: "admire", reel: "fem", kick: "but this one", word: mmss(att("Femininity & dating").dwell), line: "holds me. Videos about confidence and femininity."},
+  {film: "artist", reel: "talks", kick: "loyalty", count: Math.round(M.channels_once / M.channels * 100), suffix: "%", line: `of ${fmt(M.channels)} channels never got a second chance.`},
+  {film: "chair", reel: "later", kick: "watch later", word: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "saved videos I actually came back to."},
+  {film: "mirror", reel: "close", kick: "the answer", word: "More than I'd admit.", line: `${CH.length} chapters. Press play on any of them →`, ms: 3800},
 ];
 const BEAT_MS = 2800, FRAME_MS = 300;
+// Free stock films (Mixkit license), graded to the site's palette. Step-printed frames sit underneath as a fallback.
+const FILMS = {mirror: "clips/mirror.mp4", chair: "clips/chair.mp4", retro: "clips/retro.mp4", lips: "clips/lips.mp4", admire: "clips/admire.mp4", artist: "clips/artist.mp4"};
 // Step-printing: YouTube's three frames from inside each video (25/50/75% through), crossfaded like a film edit.
 const framesOf = vids => vids.flatMap(id => ["hq1", "hq2", "hq3"].map(f => `https://i.ytimg.com/vi/${id}/${f}.jpg`));
 function reel(a, b, vids, isPaused = () => false) {
@@ -912,7 +923,18 @@ let trailer = null;
 function startTrailer() {
   if (trailer) cancelAnimationFrame(trailer.raf);
   const root = document.querySelector(".trailer"), segs = root.querySelectorAll(".tseg i");
-  const frA = $("#frA"), frB = $("#frB");
+  const frA = $("#frA"), frB = $("#frB"), vids = [$("#vA"), $("#vB")];
+  let vFront = 0;
+  const warm = src => { if (!src || document.querySelector(`link[data-film="${src}"]`)) return; const l = document.createElement("link"); l.rel = "preload"; l.as = "video"; l.href = src; l.dataset.film = src; document.head.appendChild(l); };
+  const playFilm = src => {
+    const cur = vids[vFront], nxt = vids[1 - vFront];
+    if (!src) { vids.forEach(v => v.classList.remove("on")); return; }
+    if (cur.getAttribute("src") === src && cur.classList.contains("on")) return;
+    nxt.src = src;
+    const go = () => { nxt.onplaying = null; nxt.classList.add("on"); cur.classList.remove("on"); vFront = 1 - vFront; };
+    nxt.onplaying = go;
+    nxt.load(); nxt.play().catch(() => {});
+  };
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const T = {k: 0, t0: performance.now(), elapsed: 0, paused: false};
   const dur = k => TRAILER[k].ms || BEAT_MS;
@@ -921,6 +943,8 @@ function startTrailer() {
     T.k = (k + TRAILER.length) % TRAILER.length;
     const b = TRAILER[T.k];
     reel(frA, frB, REEL[b.reel].length ? REEL[b.reel] : REEL.open, () => T.paused);
+    playFilm(FILMS[b.film]);
+    warm(FILMS[TRAILER[(T.k + 1) % TRAILER.length].film]);   // fetch only the next beat's film
     const nxt = REEL[TRAILER[(T.k + 1) % TRAILER.length].reel] || [];
     framesOf(nxt).forEach(src => { const im = new Image(); im.src = src; });   // warm the next reel
     root.classList.toggle("boot", b.mode === "boot");
@@ -953,7 +977,8 @@ function startTrailer() {
   root.querySelector(".tseg").onclick = e => { const btn = e.target.closest("button"); if (btn) { show(+btn.dataset.k); T.t0 = performance.now(); T.elapsed = 0; } };
   const pp = $("#pp");
   const setPP = () => { if (pp) { pp.innerHTML = icon(T.paused ? "play" : "pause", 22); pp.setAttribute("aria-label", T.paused ? "Play" : "Pause"); } root.classList.toggle("paused", T.paused); };
-  if (pp) pp.onclick = () => { T.paused = !T.paused; T.t0 = performance.now() - T.elapsed; setPP(); };
+  if (pp) pp.onclick = () => { T.paused = !T.paused; T.t0 = performance.now() - T.elapsed; setPP();
+    root.querySelectorAll("video").forEach(v => T.paused ? v.pause() : v.play().catch(() => {})); };
   candle($("#bokeh"), () => T.paused);
   show(0); setPP();
   setTimeout(() => root.classList.add("opened"), 500);

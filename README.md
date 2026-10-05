@@ -42,3 +42,4 @@ Run it:
 - **Ads.** 14 watch entries and 5 search entries were ads ("From Google Ads"). They're dropped and counted.
 - **Topics.** Rules plus channel majority label 65% of videos. The embedding model agrees with those labels on 87% of held-out titles and labels the rest when it's confident.
 - **Privacy.** Raw exports and parquet tables never enter git. Personal filter lists (`off_limits.txt`, `exclusions.json`, `private_topics.json`) live next to the pipeline and stay out of git too; without them the pipeline still runs, it just filters less. Search queries never reach the site, only their timestamps. Titles on a blocked-topic list never get a topic, so they can't reach the site. Everything runs locally, with no paid APIs.
+- **Opening footage.** The films in the opening sequence (`site/clips/`) are free stock clips from Mixkit, used under the Mixkit Stock Video Free License, then trimmed and color-graded. Everything else is my own data.
