@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Up Next</title>
+<title>Watch Next</title>
 <meta name="description" content="Nine months of my YouTube watch history, parsed from Google Takeout into sessions, topics and watch time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -104,7 +104,9 @@ main{flex:1;min-width:0;padding:8px 24px 72px}
 .scrub i{flex:1;min-width:0;background:rgba(255,255,255,.22);border-radius:1px 1px 0 0;transition:background .15s}
 .scrub i.hot{background:#D0607A}
 .scrub i:hover,.scrub i.sel{background:#fff}
-.scrub-base{height:3px;background:#D0607A;border-radius:2px;margin-top:1px}
+.scrub-base{position:relative;height:3px;background:rgba(255,255,255,.28);border-radius:2px;margin-top:1px}
+.scrub-base b{position:absolute;left:0;top:0;bottom:0;width:100%;background:#D0607A;border-radius:2px}
+.scrub-base b:after{content:"";position:absolute;right:-6px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:#D0607A;box-shadow:0 0 0 2px rgba(0,0,0,.25)}
 .ctl{display:flex;align-items:center;gap:14px;font-size:13px;color:#fff;padding-top:7px;min-width:0}
 .ctl .sp{flex:1}
 .ctl a,.ctl span{display:inline-flex;align-items:center;flex:none}
@@ -196,38 +198,19 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
 .tline span{display:inline-block;animation:rise .3s cubic-bezier(.2,.8,.2,1) both}
 @keyframes slam{from{opacity:0;transform:scale(1.7);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.tseg{position:absolute;left:12px;right:12px;top:12px;z-index:4;display:flex;gap:4px}
-.tseg button{flex:1;height:14px;padding:5px 0;border:0;background:none;cursor:pointer;position:relative}
-.tseg button:before{content:"";display:block;height:3px;border-radius:2px;background:rgba(255,255,255,.3)}
-.tseg i{position:absolute;left:0;top:5px;height:3px;border-radius:2px;background:#fff;width:0}
 .tcode{position:absolute;right:16px;bottom:14px;top:auto;z-index:4;font-size:12px;color:rgba(255,255,255,.75)}
 .tsound{position:absolute;right:12px;bottom:36px;z-index:4;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;cursor:pointer;display:grid;place-items:center}
 .pp{border:0;background:none;color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
 @media (prefers-reduced-motion:reduce){.tbig,.tk,.tline span,.tflash.go{animation:none}}
 @media (max-width:760px){.stage.trailer{min-height:440px}.tcopy{bottom:9%}.tclip iframe{transform:translate(-50%,-50%) scale(2.4)}}
 
-/* editorial title sequence: wine, gold hairlines, an arch window, film grain */
+/* editorial title sequence: wine, gold hairlines, walls of my own thumbnails, film grain */
 .ed{--ivory:#F6EDE4;--goldh:#C9A15A;--ink0:#160910}
 .trailer.ed{background:var(--ink0)}
 .ed .glow{position:absolute;inset:0;background:radial-gradient(55% 75% at 72% 48%,rgba(201,161,90,.22),transparent 62%),radial-gradient(70% 90% at 12% 85%,rgba(142,42,62,.55),transparent 70%),var(--ink0);transition:background 1s}
-.ed.flip .glow{background:radial-gradient(55% 75% at 28% 48%,rgba(201,161,90,.22),transparent 62%),radial-gradient(70% 90% at 88% 85%,rgba(142,42,62,.55),transparent 70%),var(--ink0)}
-.arch{position:absolute;left:64%;top:8%;width:27%;aspect-ratio:3/4;border-radius:999px 999px 16px 16px;overflow:hidden;z-index:1;background:#0c0508;
-  box-shadow:0 0 0 1px rgba(201,161,90,.95),0 0 0 7px var(--ink0),0 0 0 8px rgba(201,161,90,.5),0 40px 90px rgba(0,0,0,.65);transition:left 1s cubic-bezier(.7,0,.2,1)}
-.ed.flip .arch{left:6%}
 .fr{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .22s linear;transform:scale(1.36);filter:sepia(.22) saturate(1.08) contrast(1.06) brightness(.92)}
 .fr.on{opacity:1}
-.arch.push .fr{animation:pushf 3.4s linear both}
-@keyframes pushf{from{transform:scale(1.36)}to{transform:scale(1.48)}}
 .cold .fr{transform:scale(1.16)}
-.arch .tposter,.arch .tclip{position:absolute;inset:0}
-.arch .tposter{width:100%;height:100%;object-fit:cover;transform:none;filter:sepia(.22) saturate(1.08) contrast(1.06) brightness(.92)}
-.arch .tclip{opacity:0}
-.arch .tclip.on.ready{opacity:1}
-.arch .tclip{background:#0c0508}
-.arch .tclip iframe{position:absolute;top:50%;left:50%;height:100%;width:240%;border:0;transform:translate(-50%,-50%) scale(1.7)}
-.arch.push .tposter,.arch.push .tclip{animation:push 3.4s linear both}
-@keyframes push{from{transform:scale(1.02)}to{transform:scale(1.12)}}
-.arch iframe,.cold.ed iframe{filter:sepia(.22) saturate(1.08) contrast(1.06) brightness(.95)}
 .tint{position:absolute;inset:0;background:linear-gradient(180deg,rgba(201,161,90,.16),rgba(142,42,62,.3));mix-blend-mode:soft-light;pointer-events:none}
 .ed .grain{position:absolute;inset:-60%;z-index:2;pointer-events:none;opacity:.14;mix-blend-mode:overlay;animation:grain .9s steps(6) infinite;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
@@ -236,7 +219,6 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
 .ed .tflash.go{animation:veil .6s ease-out}
 @keyframes veil{from{opacity:.85}to{opacity:0}}
 .ed .tcopy{left:6%;right:auto;width:52%;top:55%;bottom:auto;transform:translateY(-50%);z-index:3}
-.ed.flip .tcopy{left:42%}
 .cold.ed .tcopy{width:62%}
 .ed .tk{display:flex;align-items:center;gap:14px;font-family:Roboto,sans-serif;font-size:clamp(10px,1vw,13px);letter-spacing:.34em;color:var(--goldh);font-weight:500}
 .ed .rule{display:inline-block;width:46px;height:1px;background:var(--goldh);transform-origin:left;animation:rule .8s cubic-bezier(.7,0,.2,1) both}
@@ -250,27 +232,61 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
 .lb{position:absolute;left:0;right:0;height:13%;background:#000;z-index:5;transition:transform 1.2s cubic-bezier(.7,0,.2,1)}
 .lb.top{top:0}.lb.bot{bottom:0}
 .ed.opened .lb.top{transform:translateY(-101%)}.ed.opened .lb.bot{transform:translateY(101%)}
-.ed .tseg i{background:var(--goldh)}
 .cold.ed .tshade{background:linear-gradient(90deg,rgba(22,9,16,.92),rgba(22,9,16,.55) 50%,rgba(22,9,16,.15)),linear-gradient(0deg,rgba(22,9,16,.6),transparent 45%)}
 .cold.ed .cbar{background:var(--goldh)}
-@media (prefers-reduced-motion:reduce){.ed .grain,.arch.push .tposter,.arch.push .tclip,.ed .tbig,.ed .tline span,.ed .rule{animation:none}}
+@media (prefers-reduced-motion:reduce){.ed .grain,.ed .tbig,.ed .tline span,.ed .rule{animation:none}}
 @media (max-width:760px){
-  .arch{left:24%;top:7%;width:52%}.ed.flip .arch{left:24%}
-  .ed .tcopy,.ed.flip .tcopy{left:6%;width:88%;top:auto;bottom:7%;transform:none}
+  .ed .tcopy{left:6%;width:88%;top:auto;bottom:7%;transform:none}
   .stage.trailer.ed{min-height:560px}
   .ed .tbig{font-size:84px}.ed .tbig.word{font-size:64px}
 }
 
-/* real films inside the arch */
-.vc{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;filter:sepia(.18) saturate(1.05) contrast(1.06) brightness(.94)}
-.vc.on{opacity:1}
-.arch.push .vc{animation:pushv 3.4s linear both}
-@keyframes pushv{from{transform:scale(1.02)}to{transform:scale(1.1)}}
+
+/* thumbnail walls: every beat fills the frame with my own videos */
+.tw{position:absolute;inset:-2%;z-index:1;display:grid;grid-template-columns:repeat(var(--c),1fr);grid-template-rows:repeat(var(--r),1fr);gap:3px;background:var(--ink0);opacity:0;transition:opacity .55s ease}
+.tw.on{opacity:1}
+.tw.go{animation:twdrift var(--ms,2800ms) linear both}
+@keyframes twdrift{from{transform:scale(1.07)}to{transform:scale(1)}}
+.tw .cell{position:relative;overflow:hidden;background:#0c0508;animation:twin .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0ms)}
+.tw img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.92) contrast(1.04) brightness(.86)}
+.tw iframe{position:absolute;top:50%;left:50%;width:1280px;height:720px;border:0;transform:translate(-50%,-50%) scale(var(--k,.3));pointer-events:none;opacity:0;transition:opacity .4s ease;filter:saturate(.98) contrast(1.04)}
+.tw .cell.ready iframe{opacity:1}
+@keyframes twin{from{opacity:0;transform:scale(1.12)}to{opacity:1;transform:none}}
+.twshade{position:absolute;inset:0;z-index:2;pointer-events:none;transition:background .6s ease;
+  background:linear-gradient(90deg,rgba(22,9,16,.9) 0%,rgba(22,9,16,.62) 36%,rgba(22,9,16,.12) 66%,rgba(22,9,16,0)),linear-gradient(0deg,rgba(22,9,16,.5),transparent 40%)}
+.ed.boot .twshade,.ed.question .twshade,.ed.close .twshade{background:radial-gradient(70% 80% at 50% 50%,rgba(22,9,16,.7),rgba(22,9,16,.88))}
+.ed.channels .twshade,.ed.playlists .twshade{background:rgba(22,9,16,.9)}
+.ed.close .tcopy,.ed.channels .tcopy,.ed.playlists .tcopy{left:6%;right:6%;width:auto}
+.ed.close .tcopy{text-align:center}.ed.close .tk{justify-content:center}.ed.close .tline{margin:0 auto}
+.names{display:flex;flex-wrap:wrap;align-items:baseline;gap:.05em .55em;margin-top:18px;font-family:"Instrument Serif",Georgia,serif;font-style:italic;color:var(--ivory);line-height:1.05}
+.names span{font-size:calc(var(--s) * 1vw);animation:focus .6s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d)}
+.names span:nth-child(3n+2){color:var(--goldh)}
+.names span:nth-child(3n){color:rgba(246,237,228,.62)}
+.pls{display:flex;gap:3.2%;margin-top:22px}
+.pl{flex:1;min-width:0;animation:focus .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d)}
+.plth{position:relative;aspect-ratio:16/9;border-radius:10px;margin-top:12px}
+.plth:before,.plth:after{content:"";position:absolute;left:8%;right:8%;top:-7px;height:20px;border-radius:8px 8px 0 0;background:rgba(201,161,90,.55)}
+.plth:after{left:14%;right:14%;top:-13px;background:rgba(201,161,90,.28)}
+.plth img{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;border-radius:10px;display:block;box-shadow:0 0 0 1px rgba(201,161,90,.7),0 24px 60px rgba(0,0,0,.5)}
+.plth b{position:absolute;z-index:2;right:0;top:0;bottom:0;width:38%;border-radius:0 10px 10px 0;background:rgba(22,9,16,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:500 clamp(12px,1.3vw,20px) Roboto,sans-serif;color:var(--ivory)}
+.plth b svg{width:30%;height:auto}
+.pl h4{margin:12px 0 0;font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-style:italic;font-size:clamp(20px,2.4vw,40px);color:var(--ivory);line-height:1}
+.pl p{margin:6px 0 0;font:400 clamp(11px,1vw,15px) Roboto,sans-serif;color:rgba(246,237,228,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:760px){.pls{gap:10px}.plth b{font-size:11px}}
+@media (prefers-reduced-motion:reduce){.tw.go,.tw img,.names span,.pl{animation:none}}
+/* type scales with the player, not the window, so long topic names and the closing line always fit */
+.trailer.ed{container-type:inline-size}
+.ed.topicbeat .tbig.word{font-size:clamp(34px,7.4cqw,112px);max-width:9ch;line-height:.92}
+.ed.topicbeat .tline{font-size:clamp(15px,2.3cqw,32px);max-width:34ch}
+.ed.close .tbig.word{font-size:clamp(40px,7.6cqw,120px)}
+.ed.question .tbig.word{font-size:clamp(36px,6.4cqw,104px)}
+.ed .tbig{font-size:clamp(56px,11cqw,172px)}
+.ed .tline{font-size:clamp(15px,2.5cqw,36px)}
+.names span{font-size:calc(var(--s) * 1cqw)}
+.pl h4{font-size:clamp(18px,2.8cqw,40px)}
 
 /* boot intro + central question */
 .ed .bokeh{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;mix-blend-mode:screen}
-.ed.boot .arch,.ed.question .arch{opacity:0;transform:scale(.55);pointer-events:none}
-.arch{transition:left 1s cubic-bezier(.7,0,.2,1),opacity .8s ease,transform 1s cubic-bezier(.2,.8,.2,1)}
 .ed.boot .tcopy,.ed.question .tcopy{left:0;right:0;width:auto;text-align:center;top:50%;transform:translateY(-50%)}
 .bootmark{display:flex;flex-direction:column;align-items:center;gap:18px}
 .bm{position:relative;width:104px;height:74px;border-radius:22px;background:#8E2A3E;display:grid;place-items:center;overflow:hidden;
@@ -437,7 +453,7 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
 <body>
 <header class="mast">
   <button class="burger" id="burger" aria-label="Menu"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg></button>
-  <a class="logo" href="#intro" aria-label="Up Next home"><span class="mark"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 0l11 6-11 6z" fill="#fff"/></svg></span><span class="word">Up Next</span><small>2026</small></a>
+  <a class="logo" href="#intro" aria-label="Watch Next home"><span class="mark"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 0l11 6-11 6z" fill="#fff"/></svg></span><span class="word">Watch Next</span><small>2026</small></a>
   <form class="search" id="search" role="search" autocomplete="off">
     <input id="q" aria-label="Search titles or ask a question">
     <button class="go" aria-label="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button>
@@ -542,11 +558,10 @@ const CH = [
     stage() {
       return `<div class="stage has-wall trailer ed" style="padding:0">
         <div class="glow"></div><canvas class="bokeh" id="bokeh"></canvas>
-        <div class="arch" id="arch"><img class="fr" id="frA" alt=""><img class="fr" id="frB" alt=""><video class="vc" id="vA" muted playsinline loop preload="none"></video><video class="vc" id="vB" muted playsinline loop preload="none"></video><div class="tint"></div></div>
+        <div class="tw" id="twA"></div><div class="tw" id="twB"></div><div class="tw" id="twC"></div><div class="twshade"></div>
         <div class="grain"></div><div class="tflash" id="tflash"></div>
         <div class="tcopy" id="tcopy"></div>
         <div class="lb top"></div><div class="lb bot"></div>
-        <div class="tseg">${TRAILER.map((_, k) => `<button data-k="${k}" aria-label="Beat ${k + 1}"><i></i></button>`).join("")}</div>
         <span class="tcode mono" id="tcode"></span>
         </div>`;
     },
@@ -837,17 +852,7 @@ function pick(list, n = 4) {
 }
 const lateMk = topCards(p => p[2] <= 4 && D.all[p[0]].topic === "Makeup & hair", 40).map(x => x.c);
 const monthTop = (m, t) => topCards(p => p[3] === m && D.all[p[0]].topic === t, 10).map(x => x.c);
-const REEL = {
-  open: pick([ofTopic("Femininity & dating")[1], ofTopic("Film & TV")[1], ofTopic("Makeup & hair")[2], ofTopic("Femininity & dating")[3]].filter(Boolean)),
-  film: pick(ofTopic("Film & TV")),
-  growth: pick(ofTopic("Mindset & discipline")),
-  late: pick(lateMk),
-  makeup: pick(ofTopic("Makeup & hair")),
-  fem: pick(ofTopic("Femininity & dating")),
-  talks: pick(ofTopic("Talks & ideas")),
-  later: pick(D.watch_later.filter(w => w.t)),
-  close: pick([...ofTopic("Femininity & dating"), ...ofTopic("Film & TV")].sort((a, b) => b.n - a.n)),
-};
+const REEL = {};
 // chapter openers get their own, deeper picks
 Object.assign(REEL, {
   c_hours: pick(lateMk),
@@ -859,21 +864,42 @@ Object.assign(REEL, {
   c_later: D.watch_later.filter(w => w.t).map(w => w.id),   // only a few saved videos exist, so this one may repeat
   c_built: pick([...ofTopic("Calm & wellbeing"), ...ofTopic("Food"), ...ofTopic("Art & making")]),
 });
+// The cover gives every side of my YouTube its own wall of thumbnails: all eight topics (biggest first, each
+// with its top channels), then the channels themselves, then every playlist I keep.
+const TOPIC_ORDER = [...D.attention].sort((a, b) => b.n - a.n);
+const byPlays = list => [...list].sort((a, b) => b.n - a.n);
+function wallIds(list, n) {
+  const out = [], keys = new Set();
+  for (const c of list) {
+    const key = titleKey(c);
+    if (!c.id || AVOID.has(c.id) || out.includes(c.id) || (key && keys.has(key))) continue;
+    keys.add(key); out.push(c.id);
+  }
+  return out.slice(0, n + 6);   // a few spares stand in for deleted videos
+}
+const noEmoji = t => t.replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, "").replace(/\s+/g, " ").trim();
+const chOf = list => { const m = new Map(); list.forEach(c => { const n = c.ch && noEmoji(c.ch); if (n) m.set(n, (m.get(n) || 0) + c.n); }); return [...m].sort((a, b) => b[1] - a[1]); };
+const lanes = TOPIC_ORDER.map(a => byPlays(ofTopic(a.topic)));
+const EVERY = wallIds(Array.from({length: 12}, (_, r) => lanes.map(l => l[r])).flat().filter(Boolean), 36);
+const EVERY2 = wallIds(Array.from({length: 12}, (_, r) => lanes.map(l => l[r + 12])).flat().filter(Boolean), 36);
+const EVERY3 = EVERY.slice(6), EVERY4 = EVERY2.slice(6);   // each everything-wall shows its own six clips
+const CARD = new Map(D.all.map(c => [c.id, c]));
+// start each clip a quarter of the way into the part I actually watched
+const clipAt = id => { const c = CARD.get(id); return Math.max(3, Math.round(((c && c.dw) || 20) * .25)); };
+const CHANNELS = chOf(D.all).slice(0, 24);
+const plIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h12v2H3zm0 4h12v2H3zm0 4h8v2H3zm14-1v6l5-3z"/></svg>';
 const TRAILER = [
-  {mode: "boot", reel: "open", ms: 2300},
-  {mode: "question", reel: "open", kick: `nine months · ${fmt(M.videos)} videos · one question`, word: "What does my YouTube know about me?", ms: 3400},
-  {film: "mirror", reel: "film", kick: `${M.from} – ${M.to}`, count: M.videos, line: "videos. Google kept one thing about each: the second it started."},
-  {film: "chair", reel: "growth", kick: "so I rebuilt", word: "the rest.", line: "Sessions. Watch time. Skips. Topics."},
-  {film: "retro", reel: "late", kick: "12 AM – 5 AM", count: Math.round(lateMakeup * 100), suffix: "%", line: "of what I watch after midnight is makeup."},
-  {film: "lips", reel: "makeup", kick: "attention span", count: att("Makeup & hair").dwell, suffix: "s", line: "is all a makeup tutorial gets before I'm gone."},
-  {film: "admire", reel: "fem", kick: "but this one", word: mmss(att("Femininity & dating").dwell), line: "holds me. Videos about confidence and femininity."},
-  {film: "artist", reel: "talks", kick: "loyalty", count: Math.round(M.channels_once / M.channels * 100), suffix: "%", line: `of ${fmt(M.channels)} channels never got a second chance.`},
-  {film: "chair", reel: "later", kick: "watch later", word: `${D.watch_later_watched}<span class="dim">/${D.watch_later_total}</span>`, line: "saved videos I actually came back to."},
-  {film: "mirror", reel: "close", kick: "the answer", word: "More than I'd admit.", line: `${CH.length} chapters. Press play on any of them →`, ms: 3800},
+  {mode: "boot", wall: EVERY, grid: [3, 2], ms: 2300},
+  {mode: "question", wall: EVERY, grid: [3, 2], kick: `nine months · ${fmt(M.videos)} videos · one question`, word: "What does my YouTube know about me?", ms: 3400},
+  {wall: EVERY2, grid: [3, 2], kick: `${M.from} – ${M.to}`, count: M.videos, line: "videos. Google kept one thing about each: the second it started."},
+  ...TOPIC_ORDER.map((a, i) => ({wall: wallIds(byPlays(ofTopic(a.topic)), 6), grid: [3, 2], topic: true, ms: 2500,
+    kick: `${i + 1} of ${TOPIC_ORDER.length} · ${fmt(a.n)} videos`, word: esc(a.topic),
+    line: chOf(ofTopic(a.topic)).slice(0, 3).map(([n]) => n).join(" · ")})),
+  {mode: "channels", wall: EVERY4, grid: [3, 2], ms: 3600, kick: `${fmt(M.channels)} channels · the ${CHANNELS.length} I play most`},
+  {mode: "playlists", wall: EVERY3, grid: [3, 2], ms: 3600, kick: `${D.playlists.length} playlists · every one I keep`},
+  {mode: "close", wall: EVERY, grid: [3, 2], kick: "the answer", word: "More than I'd admit.", line: `${CH.length} chapters. Press play on any of them →`, ms: 3800},
 ];
 const BEAT_MS = 2800, FRAME_MS = 300;
-// Free stock films (Mixkit license), graded to the site's palette. Step-printed frames sit underneath as a fallback.
-const FILMS = {mirror: "clips/mirror.mp4", chair: "clips/chair.mp4", retro: "clips/retro.mp4", lips: "clips/lips.mp4", admire: "clips/admire.mp4", artist: "clips/artist.mp4"};
 // Step-printing: YouTube's three frames from inside each video (25/50/75% through), crossfaded like a film edit.
 const framesOf = vids => vids.flatMap(id => ["hq1", "hq2", "hq3"].map(f => `https://i.ytimg.com/vi/${id}/${f}.jpg`));
 function reel(a, b, vids, isPaused = () => false) {
@@ -919,19 +945,46 @@ function candle(cv, isPaused) {
 let trailer = null;
 function startTrailer() {
   if (trailer) cancelAnimationFrame(trailer.raf);
-  const root = document.querySelector(".trailer"), segs = root.querySelectorAll(".tseg i");
-  const frA = $("#frA"), frB = $("#frB"), vids = [$("#vA"), $("#vB")];
-  let vFront = 0;
-  const warm = src => { if (!src || document.querySelector(`link[data-film="${src}"]`)) return; const l = document.createElement("link"); l.rel = "preload"; l.as = "video"; l.href = src; l.dataset.film = src; document.head.appendChild(l); };
-  const playFilm = src => {
-    const cur = vids[vFront], nxt = vids[1 - vFront];
-    if (!src) { vids.forEach(v => v.classList.remove("on")); return; }
-    if (cur.getAttribute("src") === src && cur.classList.contains("on")) return;
-    nxt.src = src;
-    const go = () => { nxt.onplaying = null; nxt.classList.add("on"); cur.classList.remove("on"); vFront = 1 - vFront; };
-    nxt.onplaying = go;
-    nxt.load(); nxt.play().catch(() => {});
+  const root = document.querySelector(".trailer"), head = $("#playhead");
+  const walls = [$("#twA"), $("#twB"), $("#twC")];
+  const keyOf = b => b.wall.slice(0, b.grid[0] * b.grid[1]).join();
+  // a wall of live clips over their thumbnails; a deleted video's grey placeholder is swapped for a spare
+  const build = (el, b) => {
+    const [c, r] = b.grid, n = c * r, spares = b.wall.slice(n);
+    el.dataset.key = keyOf(b); el.style.setProperty("--c", c); el.style.setProperty("--r", r);
+    el.innerHTML = b.wall.slice(0, n).map((id, i) => `<div class="cell" data-yt data-wait="3400" style="--d:${(i % c + Math.floor(i / c)) * 70}ms"><img alt="" src="${thumb(id)}">
+      <iframe src="${clipSrc([id, clipAt(id)])}" title="" tabindex="-1" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`).join("");
+    el.querySelectorAll("img").forEach(im => im.onload = () => { if (im.naturalWidth <= 120 && spares.length) { const id = spares.shift(); im.src = thumb(id); im.nextElementSibling.src = clipSrc([id, clipAt(id)]); } });
+    fitClips(el);
+    el.querySelectorAll("iframe").forEach(f => f.onload = () => f.contentWindow.postMessage(JSON.stringify({event: "listening", id: 1, channel: "widget"}), "*"));
   };
+  // clips play at full size and are scaled into their cell, so YouTube never switches to its small-player buttons;
+  // the 1.32 overscan crops its title bar and corner logo
+  const fitClips = el => { const c = el.querySelector(".cell"); if (!c) return; const r = c.getBoundingClientRect();
+    el.style.setProperty("--k", (Math.max(r.width / 1280, r.height / 720) * 1.32).toFixed(4)); };
+  addEventListener("resize", () => walls.forEach(fitClips));
+  // three walls rotate: the one on screen and the next two, which load early so their clips are already
+  // playing, controls faded, by the time they cut in
+  const ensure = (b, keep) => {
+    let w = walls.find(x => x.dataset.key === keyOf(b));
+    if (!w) { w = walls.find(x => !keep.includes(x)); build(w, b); }
+    return w;
+  };
+  const setWall = b => {
+    const cur = walls.find(w => w.classList.contains("on")), w = ensure(b, cur ? [cur] : []);
+    w.classList.remove("go"); void w.offsetWidth; w.style.setProperty("--ms", dur(T.k) + "ms"); w.classList.add("go");
+    if (w !== cur) { w.classList.add("on"); if (cur) cur.classList.remove("on"); }
+    clearTimeout(walls._pre);
+    walls._pre = setTimeout(() => {
+      const ahead = [];
+      for (let j = T.k + 1; ahead.length < 2 && j < T.k + TRAILER.length; j++) {
+        const x = TRAILER[j % TRAILER.length];
+        if (keyOf(x) !== keyOf(b) && !ahead.some(a => keyOf(a) === keyOf(x))) ahead.push(x);
+      }
+      const keep = [w]; ahead.forEach(x => keep.push(ensure(x, keep)));
+    }, 700);
+  };
+
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const T = {k: 0, t0: performance.now(), elapsed: 0, paused: false};
   const dur = k => TRAILER[k].ms || BEAT_MS;
@@ -939,22 +992,26 @@ function startTrailer() {
   const show = k => {
     T.k = (k + TRAILER.length) % TRAILER.length;
     const b = TRAILER[T.k];
-    reel(frA, frB, REEL[b.reel].length ? REEL[b.reel] : REEL.open, () => T.paused);
-    playFilm(FILMS[b.film]);
-    warm(FILMS[TRAILER[(T.k + 1) % TRAILER.length].film]);   // fetch only the next beat's film
-    const nxt = REEL[TRAILER[(T.k + 1) % TRAILER.length].reel] || [];
-    framesOf(nxt).forEach(src => { const im = new Image(); im.src = src; });   // warm the next reel
-    root.classList.toggle("boot", b.mode === "boot");
-    root.classList.toggle("question", b.mode === "question");
+    setWall(b);
+    ["boot", "question", "channels", "playlists", "close"].forEach(m => root.classList.toggle(m, b.mode === m));
+    root.classList.toggle("topicbeat", !!b.topic);   // a topic beat
     if (b.mode === "boot") {
-      $("#tcopy").innerHTML = `<div class="bootmark"><span class="bm"><svg viewBox="0 0 24 24" width="42" height="42"><path d="M8 5.5v13l10.5-6.5z" fill="#F6EDE4"/></svg><i class="shine"></i></span><span class="bw">Up Next</span></div>`;
+      $("#tcopy").innerHTML = `<div class="bootmark"><span class="bm"><svg viewBox="0 0 24 24" width="42" height="42"><path d="M8 5.5v13l10.5-6.5z" fill="#F6EDE4"/></svg><i class="shine"></i></span><span class="bw">Watch Next</span></div>`;
       const flash0 = $("#tflash"); flash0.classList.remove("go");
+      return;
+    }
+    if (b.mode === "channels" || b.mode === "playlists") {
+      const top = CHANNELS[0][1];
+      $("#tcopy").innerHTML = `<div class="tk"><i class="rule"></i>${esc(b.kick)}</div>` + (b.mode === "channels"
+        ? `<div class="names">${CHANNELS.map(([n, v], i) => `<span style="--s:${(1.6 + 2.4 * Math.sqrt(v / top)).toFixed(2)};--d:${i * 45}ms">${esc(n)}</span>`).join("")}</div>`
+        : `<div class="pls">${D.playlists.map((p, i) => { const v = p.videos[0];
+            return `<div class="pl" style="--d:${150 + i * 160}ms"><div class="plth">${v ? `<img alt="" src="${thumb(v.id)}">` : ""}<b>${p.total}${plIcon}</b></div>
+              <h4>${esc(p.name)}</h4><p>${v ? esc(v.t) : ""}</p></div>`; }).join("")}</div>`);
+      const flash = $("#tflash"); flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
       return;
     }
     $("#tcopy").innerHTML = `<div class="tk"><i class="rule"></i>${esc(b.kick)}</div><div class="tbig${b.word ? " word" : ""}" id="tbig">${b.word || "0" + (b.suffix ? `<span class="suf">${b.suffix}</span>` : "")}</div>${b.line ? `<div class="tline">${typeLine(b.line)}</div>` : ""}`;
     const flash = $("#tflash"); flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
-    root.classList.remove("flip");   // the arch stays put; films and the push-in carry the motion
-    const arch = $("#arch"); arch.classList.remove("push"); void arch.offsetWidth; arch.classList.add("push");
     if (b.count !== undefined) {
       const t0 = performance.now(), el = $("#tbig");
       const step = now => { const p = still ? 1 : Math.min(1, (now - t0) / 650), v = Math.round(b.count * (1 - Math.pow(1 - p, 3)));
@@ -966,12 +1023,11 @@ function startTrailer() {
     if (!document.body.contains(root)) return;
     if (!T.paused) T.elapsed = now - T.t0;
     if (T.elapsed >= dur(T.k)) { show(T.k + 1); T.t0 = now; T.elapsed = 0; }
-    segs.forEach((s, i) => s.style.width = (i < T.k ? 100 : i === T.k ? T.elapsed / dur(T.k) * 100 : 0) + "%");
     const total = TRAILER.reduce((a, _, i) => a + dur(i), 0), at = TRAILER.slice(0, T.k).reduce((a, _, i) => a + dur(i), 0) + T.elapsed;
+    if (head) head.style.width = (at / total * 100).toFixed(2) + "%";   // the red line plays through the opening
     $("#tcode").textContent = `0:${String(Math.floor(at / 1000)).padStart(2, "0")} / 0:${String(Math.round(total / 1000)).padStart(2, "0")}`;
     T.raf = requestAnimationFrame(tick);
   };
-  root.querySelector(".tseg").onclick = e => { const btn = e.target.closest("button"); if (btn) { show(+btn.dataset.k); T.t0 = performance.now(); T.elapsed = 0; } };
   const pp = $("#pp");
   const setPP = () => { if (pp) { pp.innerHTML = icon(T.paused ? "play" : "pause", 22); pp.setAttribute("aria-label", T.paused ? "Play" : "Pause"); } root.classList.toggle("paused", T.paused); };
   if (pp) pp.onclick = () => { T.paused = !T.paused; T.t0 = performance.now() - T.elapsed; setPP();
@@ -998,10 +1054,14 @@ window.addEventListener("message", e => {
     document.querySelectorAll("[data-yt]").forEach(sl => { const f = sl.querySelector("iframe"); if (f && f.contentWindow === e.source) sl.classList.remove("ready"); });
     return;
   }
+  if (state === 3) {   // buffering brings the controls back: wall clips drop to their thumbnail until playing again
+    document.querySelectorAll("[data-yt][data-wait]").forEach(sl => { const f = sl.querySelector("iframe"); if (f && f.contentWindow === e.source) sl.classList.remove("ready"); });
+    return;
+  }
   if (state !== 1) return;
-  // wait out YouTube's start-of-playback controls before revealing the clip
+  // wait out YouTube's start-of-playback controls before revealing the clip (wall clips wait until they fade)
   document.querySelectorAll("[data-yt]").forEach(sl => { const f = sl.querySelector("iframe");
-    if (f && f.contentWindow === e.source && !sl.dataset.pending) { sl.dataset.pending = 1; setTimeout(() => { delete sl.dataset.pending; if (sl.contains(f)) sl.classList.add("ready"); }, 1100); } });
+    if (f && f.contentWindow === e.source && !sl.dataset.pending) { sl.dataset.pending = 1; setTimeout(() => { delete sl.dataset.pending; if (sl.contains(f)) sl.classList.add("ready"); }, +(sl.dataset.wait || 1100)); } });
 });
 function countUp(el, value, suffix = "", ms = 650) {
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches, t0 = performance.now();
@@ -1072,7 +1132,7 @@ function upNextThumb(id) {
 }
 function scrub(chId, day) {
   const n = D.daily.n, mx = Math.max(...n);
-  return `<div class="scrub" id="scrub">${n.map((v, d) => `<i data-day="${d}" class="${chId === "holes" && holeDays.has(d) ? "hot" : ""}${d === day ? " sel" : ""}" style="height:${Math.max(6, v / mx * 100)}%" data-tip="<b>${dayLabel(d)}</b><br>${v} video${v === 1 ? "" : "s"}${v ? " · click to see them" : ""}"></i>`).join("")}</div><div class="scrub-base"></div>`;
+  return `<div class="scrub" id="scrub">${n.map((v, d) => `<i data-day="${d}" class="${chId === "holes" && holeDays.has(d) ? "hot" : ""}${d === day ? " sel" : ""}" style="height:${Math.max(6, v / mx * 100)}%" data-tip="<b>${dayLabel(d)}</b><br>${v} video${v === 1 ? "" : "s"}${v ? " · click to see them" : ""}"></i>`).join("")}</div><div class="scrub-base"><b id="playhead"></b></div>`;
 }
 function dayLower(d) {
   const items = topCards(p => p[1] === d, 200), n = D.daily.n[d];
@@ -1096,7 +1156,7 @@ function render(chId, f, opts = {}) {
           <div class="ctl"><a href="#${prev.id}" aria-label="Previous chapter">${icon("prev", 22)}</a>${ch.id === "intro" && opts.search === undefined && opts.day === undefined ? `<button class="pp" id="pp" aria-label="Pause">${icon("pause", 22)}</button>` : `<span>${icon("play", 22)}</span>`}<a href="#${next.id}" aria-label="Next chapter">${icon("next", 22)}</a>
           <span class="mono">${i + 1} / ${CH.length}</span><span class="chap">${esc(ch.title)}</span><span class="sp"></span><span class="opt mono">${M.from} – ${M.to}</span></div></div></div></div>
       <div class="vtitle">${esc(ch.title)}</div>
-      <div class="owner"><span class="avatar">S</span><div class="who"><b>Up Next</b><span>${esc(ch.step)}</span></div><span style="flex:1"></span>
+      <div class="owner"><span class="avatar">S</span><div class="who"><b>Watch Next</b><span>${esc(ch.step)}</span></div><span style="flex:1"></span>
         <a class="pill" href="#${next.id}">Next chapter ${icon("next", 18)}</a>
         <a class="pill dark" href="#built">${icon("code", 18)} How it's built</a></div>
       <div class="desc"><p style="color:var(--ink-2)">${esc(ch.q)}</p>${ch.desc()}

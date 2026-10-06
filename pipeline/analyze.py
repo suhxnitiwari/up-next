@@ -162,10 +162,30 @@ def main():
     nxt = pd.Series([wt.iloc[p] if p < len(wt) else pd.NaT for p in pos])
     gap_min = (nxt - se.ts).dt.total_seconds() / 60
 
+    # ---- playlists: every saved video, titled via oEmbed, with the same exclusions as the history
+    seen = set(w.video_id)
+    meta = oembed(playlists.video_id.tolist())
+
+    def playlist_rows(pl):
+        rows = []
+        for r in pl.itertuples():
+            m = meta.get(r.video_id)
+            title = tidy(m["title"]) if m and m.get("title") else None
+            ch_name = (m or {}).get("channel") or ""
+            row = pd.DataFrame({"title": [title], "channel": [ch_name], "topic": [None]})
+            if (title and OFF_LIMITS.search(title + " | " + ch_name)) or excluded(row, ignore_topic=True).iat[0]:
+                continue
+            rows.append({"id": r.video_id, "t": title, "ch": ch_name,
+                         "added": r.added.strftime("%b %-d, %Y"), "watched": r.video_id in seen})
+        return rows
+
+    all_playlists = []
+    for name, pl in playlists.sort_values("added", ascending=False).groupby("playlist", sort=False):
+        all_playlists.append({"name": name, "total": len(pl), "videos": playlist_rows(pl)})
+    all_playlists.sort(key=lambda p: -p["total"])
+
     # ---- watch later
     wl = playlists[playlists.playlist == "Watch later"].sort_values("added", ascending=False)
-    seen = set(w.video_id)
-    meta = oembed(wl.video_id.tolist())
     watch_later = []
     for r in wl.itertuples():
         m = meta.get(r.video_id)
@@ -294,6 +314,7 @@ def main():
                      "gap_bins": [int((gap_min <= 1).sum()), int(gap_min.between(1, 5, inclusive="right").sum()),
                                   int(gap_min.between(5, 60, inclusive="right").sum()), int((gap_min > 60).sum() + gap_min.isna().sum())]},
         "watch_later": watch_later,
+        "playlists": all_playlists,
         "watch_later_total": len(wl), "watch_later_watched": int(wl.video_id.isin(seen).sum()),
         "pipeline": {
             "cells": sum(log["rows"].values()) and log["rows"]["watches"] + sum(log["watch_dropped"].values()),
