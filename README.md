@@ -2,7 +2,7 @@
 
 **Live:** https://suhxnitiwari.github.io/up-next/
 
-Nine months of my YouTube (January–October 2026), parsed from Google Takeout: what I watch, when I watch it, how fast I move on, and which channels I keep coming back to. Some plays (1,060 of 2,037) are left out of the site by choice.
+Nine months of my YouTube (January–October 2026), parsed from Google Takeout: what I watch, when I watch it, how fast I move on, and which channels I keep coming back to. Some plays (1,061 of 2,037) are left out of the site by choice.
 
 The site is a YouTube watch page built from my own history. Each chapter in the "Up next" queue plays one question in the player, and the filters under it query every play in the browser.
 
@@ -15,7 +15,7 @@ The site is a YouTube watch page built from my own history. Each chapter in the 
 | Sessionization | A 30-minute gap starts a new session; watch time = gap to the next start, capped at 30 min | 304 sessions, ~64 estimated hours (after exclusions) |
 | Topics | Keyword rules → channel majority → logistic regression on multilingual MiniLM title embeddings | 87% agreement on held-out titles |
 | Behavior | Session gateways, topic-to-topic transitions, channel concentration, search-to-click timing | 73 of 509 channels = half of all plays |
-| Export | Privacy filters, aggregates and a per-play table for client-side filtering | 977 plays, 583 searchable titles |
+| Export | Privacy filters, aggregates and a per-play table for client-side filtering | 976 plays, 582 searchable titles |
 
 ## Pipeline
 
