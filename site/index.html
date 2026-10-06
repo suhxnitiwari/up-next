@@ -106,6 +106,12 @@ main{flex:1;min-width:0;padding:8px 24px 72px}
 .scrub i:hover,.scrub i.sel{background:#fff}
 .scrub-base{position:relative;height:3px;background:rgba(255,255,255,.28);border-radius:2px;margin-top:1px}
 .scrub-base b{position:absolute;left:0;top:0;bottom:0;width:100%;background:#D0607A;border-radius:2px}
+.scrub-base.seek{cursor:pointer;touch-action:none}
+.scrub-base.seek:before{content:"";position:absolute;left:0;right:0;top:-10px;bottom:-10px}
+.scrub-base.seek b:after{transition:transform .12s}
+.scrub-base.seek:hover b:after,.scrub-base.seek.drag b:after{transform:scale(1.35)}
+.trailer,.controls{-webkit-user-select:none;user-select:none}
+.ed.paused .tw.go,.ed.paused .tw .cell,.ed.paused .names span,.ed.paused .pl{animation-play-state:paused}
 .scrub-base b:after{content:"";position:absolute;right:-6px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:#D0607A;box-shadow:0 0 0 2px rgba(0,0,0,.25)}
 .ctl{display:flex;align-items:center;gap:14px;font-size:13px;color:#fff;padding-top:7px;min-width:0}
 .ctl .sp{flex:1}
@@ -1030,8 +1036,31 @@ function startTrailer() {
   };
   const pp = $("#pp");
   const setPP = () => { if (pp) { pp.innerHTML = icon(T.paused ? "play" : "pause", 22); pp.setAttribute("aria-label", T.paused ? "Play" : "Pause"); } root.classList.toggle("paused", T.paused); };
-  if (pp) pp.onclick = () => { T.paused = !T.paused; T.t0 = performance.now() - T.elapsed; setPP();
-    root.querySelectorAll("video").forEach(v => T.paused ? v.pause() : v.play().catch(() => {})); };
+  // pausing freezes the beat and every live clip on the wall
+  const ytAll = func => root.querySelectorAll(".tw iframe").forEach(f => f.contentWindow && f.contentWindow.postMessage(JSON.stringify({event: "command", func, args: ""}), "*"));
+  const setPaused = v => { T.paused = v; T.t0 = performance.now() - T.elapsed; setPP(); ytAll(v ? "pauseVideo" : "playVideo"); };
+  if (pp) pp.onclick = () => setPaused(!T.paused);
+  // the red line is a slider: drag it (or click anywhere on it) to move through the opening
+  const seekTo = frac => {
+    let at = Math.max(0, Math.min(.999, frac)) * TRAILER.reduce((a, _, i) => a + dur(i), 0), k = 0;
+    while (k < TRAILER.length - 1 && at >= dur(k)) { at -= dur(k); k++; }
+    if (k !== T.k) show(k);
+    T.elapsed = at; T.t0 = performance.now() - at;
+  };
+  const track = head && head.parentElement;
+  if (track) {
+    track.classList.add("seek");
+    const frac = e => { const r = track.getBoundingClientRect(); return (e.clientX - r.left) / r.width; };
+    track.onpointerdown = e => {
+      e.preventDefault(); track.setPointerCapture(e.pointerId); track.classList.add("drag");
+      const wasPaused = T.paused; T.paused = true; seekTo(frac(e));
+      track.onpointermove = m => seekTo(frac(m));
+      track.onpointerup = track.onpointercancel = () => { track.onpointermove = null; track.classList.remove("drag"); T.paused = wasPaused; T.t0 = performance.now() - T.elapsed; };
+    };
+    track.onkeydown = e => { if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return; e.preventDefault();
+      const total = TRAILER.reduce((a, _, i) => a + dur(i), 0), at = TRAILER.slice(0, T.k).reduce((a, _, i) => a + dur(i), 0) + T.elapsed;
+      seekTo((at + (e.key === "ArrowRight" ? 2000 : -2000)) / total); };
+  }
   candle($("#bokeh"), () => T.paused);
   show(0); setPP();
   setTimeout(() => root.classList.add("opened"), 500);
@@ -1132,7 +1161,7 @@ function upNextThumb(id) {
 }
 function scrub(chId, day) {
   const n = D.daily.n, mx = Math.max(...n);
-  return `<div class="scrub" id="scrub">${n.map((v, d) => `<i data-day="${d}" class="${chId === "holes" && holeDays.has(d) ? "hot" : ""}${d === day ? " sel" : ""}" style="height:${Math.max(6, v / mx * 100)}%" data-tip="<b>${dayLabel(d)}</b><br>${v} video${v === 1 ? "" : "s"}${v ? " · click to see them" : ""}"></i>`).join("")}</div><div class="scrub-base"><b id="playhead"></b></div>`;
+  return `<div class="scrub" id="scrub">${n.map((v, d) => `<i data-day="${d}" class="${chId === "holes" && holeDays.has(d) ? "hot" : ""}${d === day ? " sel" : ""}" style="height:${Math.max(6, v / mx * 100)}%" data-tip="<b>${dayLabel(d)}</b><br>${v} video${v === 1 ? "" : "s"}${v ? " · click to see them" : ""}"></i>`).join("")}</div><div class="scrub-base" role="slider" tabindex="0" aria-label="Opening position"><b id="playhead"></b></div>`;
 }
 function dayLower(d) {
   const items = topCards(p => p[1] === d, 200), n = D.daily.n[d];
