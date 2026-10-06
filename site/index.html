@@ -870,7 +870,8 @@ Object.assign(REEL, {
 });
 // The cover gives every side of my YouTube its own wall of thumbnails: all eight topics (biggest first, each
 // with its top channels), then the channels themselves, then every playlist I keep.
-const TOPIC_ORDER = [...D.attention].sort((a, b) => b.n - a.n || b.dwell - a.dwell);   // ties go to the topic I stay with longer
+const LEAD = "Mindset & discipline";   // always opens the topics; the rest follow biggest first
+const TOPIC_ORDER = [...D.attention].sort((a, b) => (b.topic === LEAD) - (a.topic === LEAD) || b.n - a.n || b.dwell - a.dwell);
 const byPlays = list => [...list].sort((a, b) => b.n - a.n);
 // only clips of real people: the pipeline screens frames from inside every video for a face, on-screen text and drawings
 const PEOPLE = new Set(D.people || []);
