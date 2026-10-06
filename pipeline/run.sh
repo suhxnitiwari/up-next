@@ -8,3 +8,5 @@ $PY parse.py
 $PY enrich.py
 $PY classify.py
 $PY analyze.py
+./frames.sh      # screens frames from inside each video for the opening
+$PY analyze.py   # again, now with the screening

@@ -841,7 +841,7 @@ const clipSrc = ([id, start]) => `https://www.youtube-nocookie.com/embed/${id}?a
 const ids = (list, n = 3) => list.slice(0, n).map(x => x.id || x.c.id);
 const ofTopic = t => D.all.filter(c => c.topic === t);
 // Every reel draws its own videos: nothing repeats across the trailer or the chapter openers.
-const AVOID = new Set(["UxQg3_Cmwhw", "X82zMaQYAwc", "3I482TBLEzc"]);   // over-used or sensitive; kept out of the reels
+const AVOID = new Set(["UxQg3_Cmwhw", "X82zMaQYAwc", "3I482TBLEzc", "obL7ny6Ijj0"]);   // over-used or sensitive; kept out of the reels
 const USED = new Set();
 const titleKey = x => ((x.t || (x.c && x.c.t) || "").toLowerCase().replace(/[^a-z ]/g, "").split(" ").filter(w => w.length > 2).slice(0, 2).join(" "));
 function pick(list, n = 4) {
@@ -870,26 +870,28 @@ Object.assign(REEL, {
 });
 // The cover gives every side of my YouTube its own wall of thumbnails: all eight topics (biggest first, each
 // with its top channels), then the channels themselves, then every playlist I keep.
-const TOPIC_ORDER = [...D.attention].sort((a, b) => b.n - a.n);
+const TOPIC_ORDER = [...D.attention].sort((a, b) => b.n - a.n || b.dwell - a.dwell);   // ties go to the topic I stay with longer
 const byPlays = list => [...list].sort((a, b) => b.n - a.n);
+// only clips of real people: the pipeline screens frames from inside every video for a face, on-screen text and drawings
+const PEOPLE = new Set(D.people || []);
 function wallIds(list, n) {
   const out = [], keys = new Set();
   for (const c of list) {
     const key = titleKey(c);
-    if (!c.id || AVOID.has(c.id) || out.includes(c.id) || (key && keys.has(key))) continue;
+    if (!c.id || !PEOPLE.has(c.id) || AVOID.has(c.id) || out.includes(c.id) || (key && keys.has(key))) continue;
     keys.add(key); out.push(c.id);
   }
   return out.slice(0, n + 6);   // a few spares stand in for deleted videos
 }
 const noEmoji = t => t.replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, "").replace(/\s+/g, " ").trim();
 const chOf = list => { const m = new Map(); list.forEach(c => { const n = c.ch && noEmoji(c.ch); if (n) m.set(n, (m.get(n) || 0) + c.n); }); return [...m].sort((a, b) => b[1] - a[1]); };
-const lanes = TOPIC_ORDER.map(a => byPlays(ofTopic(a.topic)));
+const lanes = TOPIC_ORDER.map(a => byPlays(ofTopic(a.topic)).filter(c => PEOPLE.has(c.id)));
 const EVERY = wallIds(Array.from({length: 12}, (_, r) => lanes.map(l => l[r])).flat().filter(Boolean), 36);
 const EVERY2 = wallIds(Array.from({length: 12}, (_, r) => lanes.map(l => l[r + 12])).flat().filter(Boolean), 36);
 const EVERY3 = EVERY.slice(6), EVERY4 = EVERY2.slice(6);   // each everything-wall shows its own six clips
 const CARD = new Map(D.all.map(c => [c.id, c]));
-// start each clip a quarter of the way into the part I actually watched, and never on a trailer's opening ratings card
-const clipAt = id => { const c = CARD.get(id); return Math.max(10, Math.round(((c && c.dw) || 40) * .25)); };
+// start each clip a quarter of the way into the part I actually watched, and never on a trailer's opening ratings card or title
+const clipAt = id => { const c = CARD.get(id); return Math.max(20, Math.round(((c && c.dw) || 80) * .25)); };
 const CHANNELS = chOf(D.all).slice(0, 24);
 const plIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h12v2H3zm0 4h12v2H3zm0 4h8v2H3zm14-1v6l5-3z"/></svg>';
 const TRAILER = [

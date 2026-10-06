@@ -162,6 +162,17 @@ def main():
     nxt = pd.Series([wt.iloc[p] if p < len(wt) else pd.NaT for p in pos])
     gap_min = (nxt - se.ts).dt.total_seconds() / 60
 
+    # ---- the opening only plays clips of real people: frames screened by screen.swift must each show a face,
+    # carry almost no on-screen text, and not read as a drawing or animation
+    people = []
+    screen_path = config.DATA / "screen.json"
+    if screen_path.exists():
+        scr = json.loads(screen_path.read_text())
+        def real(vid):
+            fr = scr.get(vid, {}).get("frames", [])
+            return len(fr) == 3 and all(f["face"] >= 0.015 and f["text"] <= 0.02 and f["drawn"] < 0.2 for f in fr)
+        people = [vid for vid in per_video.video_id if real(vid)]
+
     # ---- playlists: every saved video, titled via oEmbed, with the same exclusions as the history
     seen = set(w.video_id)
     meta = oembed(playlists.video_id.tolist())
@@ -315,6 +326,7 @@ def main():
                                   int(gap_min.between(5, 60, inclusive="right").sum()), int((gap_min > 60).sum() + gap_min.isna().sum())]},
         "watch_later": watch_later,
         "playlists": all_playlists,
+        "people": people,
         "watch_later_total": len(wl), "watch_later_watched": int(wl.video_id.isin(seen).sum()),
         "pipeline": {
             "cells": sum(log["rows"].values()) and log["rows"]["watches"] + sum(log["watch_dropped"].values()),
