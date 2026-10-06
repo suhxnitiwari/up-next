@@ -111,7 +111,7 @@ main{flex:1;min-width:0;padding:8px 24px 72px}
 .scrub-base.seek b:after{transition:transform .12s}
 .scrub-base.seek:hover b:after,.scrub-base.seek.drag b:after{transform:scale(1.35)}
 .trailer,.controls{-webkit-user-select:none;user-select:none}
-.ed.paused .tw.go,.ed.paused .tw .cell,.ed.paused .names span,.ed.paused .pl{animation-play-state:paused}
+.ed.paused .tw .cell,.ed.paused .names span,.ed.paused .pl{animation-play-state:paused}
 .scrub-base b:after{content:"";position:absolute;right:-6px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:#D0607A;box-shadow:0 0 0 2px rgba(0,0,0,.25)}
 .ctl{display:flex;align-items:center;gap:14px;font-size:13px;color:#fff;padding-top:7px;min-width:0}
 .ctl .sp{flex:1}
@@ -249,12 +249,10 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
 
 
 /* thumbnail walls: every beat fills the frame with my own videos */
-.tw{position:absolute;inset:-2%;z-index:1;display:grid;grid-template-columns:repeat(var(--c),1fr);grid-template-rows:repeat(var(--r),1fr);gap:3px;background:var(--ink0);opacity:0;transition:opacity .55s ease}
+.tw{position:absolute;inset:0;z-index:1;display:grid;grid-template-columns:repeat(var(--c),1fr);grid-template-rows:repeat(var(--r),1fr);gap:3px;background:var(--ink0);opacity:0;transition:opacity .55s ease}
 .tw.on{opacity:1}
-.tw.go{animation:twdrift var(--ms,2800ms) linear both}
-@keyframes twdrift{from{transform:scale(1.07)}to{transform:scale(1)}}
 .tw .cell{position:relative;overflow:hidden;background:#0c0508;animation:twin .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0ms)}
-.tw img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.92) contrast(1.04) brightness(.86)}
+.tw img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.34);filter:saturate(.92) contrast(1.04) brightness(.86)}
 .tw iframe{position:absolute;top:50%;left:50%;width:1280px;height:720px;border:0;transform:translate(-50%,-50%) scale(var(--k,.3));pointer-events:none;opacity:0;transition:opacity .4s ease;filter:saturate(.98) contrast(1.04)}
 .tw .cell.ready iframe{opacity:1}
 @keyframes twin{from{opacity:0;transform:scale(1.12)}to{opacity:1;transform:none}}
@@ -279,7 +277,7 @@ code,.code{font-family:"Roboto Mono",monospace;font-size:12px;background:var(--b
 .pl h4{margin:12px 0 0;font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-style:italic;font-size:clamp(20px,2.4vw,40px);color:var(--ivory);line-height:1}
 .pl p{margin:6px 0 0;font:400 clamp(11px,1vw,15px) Roboto,sans-serif;color:rgba(246,237,228,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:760px){.pls{gap:10px}.plth b{font-size:11px}}
-@media (prefers-reduced-motion:reduce){.tw.go,.tw img,.names span,.pl{animation:none}}
+@media (prefers-reduced-motion:reduce){.tw .cell,.names span,.pl{animation:none}}
 /* type scales with the player, not the window, so long topic names and the closing line always fit */
 .trailer.ed{container-type:inline-size}
 .ed.topicbeat .tbig.word{font-size:clamp(34px,7.4cqw,112px);max-width:9ch;line-height:.92}
@@ -953,14 +951,15 @@ function startTrailer() {
   if (trailer) cancelAnimationFrame(trailer.raf);
   const root = document.querySelector(".trailer"), head = $("#playhead");
   const walls = [$("#twA"), $("#twB"), $("#twC")];
+  const frame = id => `https://i.ytimg.com/vi/${id}/hq2.jpg`;
   const keyOf = b => b.wall.slice(0, b.grid[0] * b.grid[1]).join();
   // a wall of live clips over their thumbnails; a deleted video's grey placeholder is swapped for a spare
   const build = (el, b) => {
     const [c, r] = b.grid, n = c * r, spares = b.wall.slice(n);
     el.dataset.key = keyOf(b); el.style.setProperty("--c", c); el.style.setProperty("--r", r);
-    el.innerHTML = b.wall.slice(0, n).map((id, i) => `<div class="cell" data-yt data-wait="3400" style="--d:${(i % c + Math.floor(i / c)) * 70}ms"><img alt="" src="${thumb(id)}">
+    el.innerHTML = b.wall.slice(0, n).map((id, i) => `<div class="cell" data-yt data-wait="3400" style="--d:${(i % c + Math.floor(i / c)) * 70}ms"><img alt="" src="${frame(id)}">
       <iframe src="${clipSrc([id, clipAt(id)])}" title="" tabindex="-1" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`).join("");
-    el.querySelectorAll("img").forEach(im => im.onload = () => { if (im.naturalWidth <= 120 && spares.length) { const id = spares.shift(); im.src = thumb(id); im.nextElementSibling.src = clipSrc([id, clipAt(id)]); } });
+    el.querySelectorAll("img").forEach(im => im.onload = () => { if (im.naturalWidth <= 120 && spares.length) { const id = spares.shift(); im.src = frame(id); im.nextElementSibling.src = clipSrc([id, clipAt(id)]); } });
     fitClips(el);
     el.querySelectorAll("iframe").forEach(f => f.onload = () => f.contentWindow.postMessage(JSON.stringify({event: "listening", id: 1, channel: "widget"}), "*"));
   };
@@ -978,7 +977,6 @@ function startTrailer() {
   };
   const setWall = b => {
     const cur = walls.find(w => w.classList.contains("on")), w = ensure(b, cur ? [cur] : []);
-    w.classList.remove("go"); void w.offsetWidth; w.style.setProperty("--ms", dur(T.k) + "ms"); w.classList.add("go");
     if (w !== cur) { w.classList.add("on"); if (cur) cur.classList.remove("on"); }
     clearTimeout(walls._pre);
     walls._pre = setTimeout(() => {
@@ -1038,7 +1036,9 @@ function startTrailer() {
   const setPP = () => { if (pp) { pp.innerHTML = icon(T.paused ? "play" : "pause", 22); pp.setAttribute("aria-label", T.paused ? "Play" : "Pause"); } root.classList.toggle("paused", T.paused); };
   // pausing freezes the beat and every live clip on the wall
   const ytAll = func => root.querySelectorAll(".tw iframe").forEach(f => f.contentWindow && f.contentWindow.postMessage(JSON.stringify({event: "command", func, args: ""}), "*"));
-  const setPaused = v => { T.paused = v; T.t0 = performance.now() - T.elapsed; setPP(); ytAll(v ? "pauseVideo" : "playVideo"); };
+  const setPaused = v => { T.paused = v; T.t0 = performance.now() - T.elapsed; setPP();
+    if (v) root.querySelectorAll(".tw .cell").forEach(c => { c.classList.remove("ready"); delete c.dataset.pending; });
+    ytAll(v ? "pauseVideo" : "playVideo"); };
   if (pp) pp.onclick = () => setPaused(!T.paused);
   // the red line is a slider: drag it (or click anywhere on it) to move through the opening
   const seekTo = frac => {
@@ -1090,7 +1090,7 @@ window.addEventListener("message", e => {
   if (state !== 1) return;
   // wait out YouTube's start-of-playback controls before revealing the clip (wall clips wait until they fade)
   document.querySelectorAll("[data-yt]").forEach(sl => { const f = sl.querySelector("iframe");
-    if (f && f.contentWindow === e.source && !sl.dataset.pending) { sl.dataset.pending = 1; setTimeout(() => { delete sl.dataset.pending; if (sl.contains(f)) sl.classList.add("ready"); }, +(sl.dataset.wait || 1100)); } });
+    if (f && f.contentWindow === e.source && !sl.dataset.pending) { sl.dataset.pending = 1; setTimeout(() => { delete sl.dataset.pending; if (sl.contains(f) && !sl.closest(".paused")) sl.classList.add("ready"); }, +(sl.dataset.wait || 1100)); } });
 });
 function countUp(el, value, suffix = "", ms = 650) {
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches, t0 = performance.now();
