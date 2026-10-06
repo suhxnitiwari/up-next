@@ -888,8 +888,8 @@ const EVERY = wallIds(Array.from({length: 12}, (_, r) => lanes.map(l => l[r])).f
 const EVERY2 = wallIds(Array.from({length: 12}, (_, r) => lanes.map(l => l[r + 12])).flat().filter(Boolean), 36);
 const EVERY3 = EVERY.slice(6), EVERY4 = EVERY2.slice(6);   // each everything-wall shows its own six clips
 const CARD = new Map(D.all.map(c => [c.id, c]));
-// start each clip a quarter of the way into the part I actually watched
-const clipAt = id => { const c = CARD.get(id); return Math.max(3, Math.round(((c && c.dw) || 20) * .25)); };
+// start each clip a quarter of the way into the part I actually watched, and never on a trailer's opening ratings card
+const clipAt = id => { const c = CARD.get(id); return Math.max(10, Math.round(((c && c.dw) || 40) * .25)); };
 const CHANNELS = chOf(D.all).slice(0, 24);
 const plIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h12v2H3zm0 4h12v2H3zm0 4h8v2H3zm14-1v6l5-3z"/></svg>';
 const TRAILER = [
